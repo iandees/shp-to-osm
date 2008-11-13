@@ -36,4 +36,5 @@ Running
  java -jar shp-to-osm-0.1.jar <path to input shapefile> <path to rules file> <path to output osm file> 
  
 Known Issues
+ - The app does not read point data right now.
  - The app will apply a tag even if the data in the shapefile is an empty string or a single space.

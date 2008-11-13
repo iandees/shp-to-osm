@@ -15,3 +15,6 @@
 #
 outer,FTYPE,StreamRiver,natural,river
 outer,GNIS_Name,,name,-
+line,GNIS_Name,,name,-
+line,FTYPE,CanalDitch,waterway,ditch
+line,FTYPE,StreamRiver,waterway,stream
