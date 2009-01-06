@@ -28,6 +28,7 @@ import osm.Way;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 import java.io.File;
@@ -49,17 +50,19 @@ public class ShpToOsmConverter {
     private File inputFile;
     private File outputFile;
     private RuleSet ruleset;
+    private boolean onlyIncludeTaggedPrimitives;
 
     /**
      * @param shpFile
      * @param rules
      * @param osmFile
      */
-    public ShpToOsmConverter(File shpFile, RuleSet rules, File osmFile) {
+    public ShpToOsmConverter(File shpFile, RuleSet rules, File osmFile, boolean onlyIncludeTaggedPrim) {
         inputFile = shpFile;
         outputFile = osmFile;
         
         ruleset = rules;
+        onlyIncludeTaggedPrimitives = onlyIncludeTaggedPrim;
     }
 
     /**
@@ -130,7 +133,9 @@ public class ShpToOsmConverter {
 
                                 Way w = linestringToWay(geometryN);
                                 applyRulesList(feature, geometryType, w, ruleset.getLineRules());
-                                osmOut.addWay(w);
+                                if (shouldInclude(w)) {
+                                    osmOut.addWay(w);
+                                }
                             }
 
                         } else if ("MultiPolygon".equals(geometryType)) {
@@ -149,31 +154,47 @@ public class ShpToOsmConverter {
 
                                     applyRulesList(feature, geometryType, w, ruleset.getOuterPolygonRules());
 
-                                    Relation r = new Relation();
+                                    if (shouldInclude(w)) {
+                                        Relation r = new Relation();
 
-                                    r.addTag(new Tag("type", "multipolygon"));
+                                        r.addTag(new Tag("type", "multipolygon"));
 
-                                    r.addMember(new Member(w, "outer"));
+                                        r.addMember(new Member(w, "outer"));
 
-                                    // Then the inner ones, if any
-                                    for (int j = 0; j < geometryN.getNumInteriorRing(); j++) {
-                                        LineString innerLine = geometryN.getInteriorRingN(j);
+                                        // Then the inner ones, if any
+                                        for (int j = 0; j < geometryN.getNumInteriorRing(); j++) {
+                                            LineString innerLine = geometryN.getInteriorRingN(j);
 
-                                        w = polygonToWay(innerLine);
+                                            w = polygonToWay(innerLine);
 
-                                        applyRulesList(feature, geometryType, w, ruleset.getInnerPolygonRules());
+                                            applyRulesList(feature, geometryType, w, ruleset.getInnerPolygonRules());
 
-                                        r.addMember(new Member(w, "inner"));
+                                            r.addMember(new Member(w, "inner"));
 
+                                        }
+
+                                        osmOut.addRelation(r);
                                     }
-
-                                    osmOut.addRelation(r);
                                 } else {
                                     // If there aren't any inner lines, then
                                     // just use the outer one as a way.
                                     applyRulesList(feature, geometryType, w, ruleset.getOuterPolygonRules());
 
-                                    osmOut.addWay(w);
+                                    if (shouldInclude(w)) {
+                                        osmOut.addWay(w);
+                                    }
+                                }
+                            }
+                        } else if ("Point".equals(geometryType)) {
+                            for (int i = 0; i < geometry.getNumGeometries(); i++) {
+                                Point geometryN = (Point) geometry.getGeometryN(i);
+
+                                Node n = pointToNode(geometryN);
+
+                                applyRulesList(feature, geometryType, n, ruleset.getPointRules());
+
+                                if (shouldInclude(n)) {
+                                    osmOut.addNode(n);
                                 }
                             }
                         }
@@ -202,7 +223,7 @@ public class ShpToOsmConverter {
             FileWriter bos = new FileWriter(outputFile);
 
             bos.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-            bos.write("<osm version=\"0.5\" generator=\"SHP to OSM 0.2\">\n");
+            bos.write("<osm version=\"0.5\" generator=\"SHP to OSM 0.3\">\n");
 
             Iterator<Node> nodeIter = osmOut.getNodeIterator();
             outputNodes(bos, nodeIter);
@@ -221,6 +242,21 @@ public class ShpToOsmConverter {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        
+        System.err.println("Done.");
+    }
+
+    private boolean shouldInclude(Primitive w) {
+        if(onlyIncludeTaggedPrimitives) {
+            return w.hasTags();
+        } else {
+            return true;
+        }
+    }
+
+    private Node pointToNode(Point geometryN) {
+        Coordinate coord = geometryN.getCoordinate();
+        return new Node(coord.y, coord.x);
     }
 
     /**

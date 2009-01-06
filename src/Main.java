@@ -19,10 +19,15 @@ public class Main {
         RuleSet rules;
         try {
             shpFile = new File(args[0]);
-            osmFile = new File(args[2]);
             rules = readFileToRulesSet(new File(args[1]));
+            osmFile = new File(args[2]);
+            
+            boolean keepOnlyTaggedWays = false;
+            if(args.length == 4 && "-t".equals(args[3])) {
+                keepOnlyTaggedWays  = true;
+            }
 
-            ShpToOsmConverter conv = new ShpToOsmConverter(shpFile, rules, osmFile);
+            ShpToOsmConverter conv = new ShpToOsmConverter(shpFile, rules, osmFile, keepOnlyTaggedWays);
             conv.go();
         } catch (IOException e) {
             e.printStackTrace();
