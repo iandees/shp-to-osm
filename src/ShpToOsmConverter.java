@@ -1,4 +1,5 @@
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.shapefile.ShapefileDataStore;
@@ -129,7 +130,6 @@ public class ShpToOsmConverter {
 
                                 Way w = linestringToWay(geometryN);
                                 applyRulesList(feature, geometryType, w, ruleset.getLineRules());
-//                                applyOriginalTagsTo(feature, geometryType, w);
                                 osmOut.addWay(w);
                             }
 
@@ -146,7 +146,6 @@ public class ShpToOsmConverter {
                                 if (geometryN.getNumInteriorRing() > 0) {
                                     // Tags go on the outer way for
                                     // multipolygons
-//                                    applyOriginalTagsTo(feature, geometryType, w);
 
                                     applyRulesList(feature, geometryType, w, ruleset.getOuterPolygonRules());
 
@@ -172,7 +171,6 @@ public class ShpToOsmConverter {
                                 } else {
                                     // If there aren't any inner lines, then
                                     // just use the outer one as a way.
-//                                    applyOriginalTagsTo(feature, geometryType, w);
                                     applyRulesList(feature, geometryType, w, ruleset.getOuterPolygonRules());
 
                                     osmOut.addWay(w);
@@ -204,7 +202,7 @@ public class ShpToOsmConverter {
             FileWriter bos = new FileWriter(outputFile);
 
             bos.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-            bos.write("<osm version=\"0.5\" generator=\"SHP to OSM 0.1\">\n");
+            bos.write("<osm version=\"0.5\" generator=\"SHP to OSM 0.2\">\n");
 
             Iterator<Node> nodeIter = osmOut.getNodeIterator();
             outputNodes(bos, nodeIter);
@@ -236,17 +234,22 @@ public class ShpToOsmConverter {
         for (Property property : properties) {
             String srcKey = property.getType().getName().toString();
             if (!geometryType.equals(srcKey)) {
-                
-                String originalValue = property.getValue().toString();
-                originalValue = StringEscapeUtils.escapeXml(originalValue);
 
-                for (Rule rule : rulelist) {
-                    Tag t = rule.createTag(srcKey, originalValue);
-                    if (t != null) {
-                        w.addTag(t);
+                Object value = property.getValue();
+                if (value != null) {
+                    final String dirtyOriginalValue = value.toString().trim();
+
+                    if (!StringUtils.isEmpty(dirtyOriginalValue)) {
+                        String escapedOriginalValue = StringEscapeUtils.escapeXml(dirtyOriginalValue);
+
+                        for (Rule rule : rulelist) {
+                            Tag t = rule.createTag(srcKey, escapedOriginalValue);
+                            if (t != null) {
+                                w.addTag(t);
+                            }
+                        }
                     }
                 }
-                
             }
         }
     }
