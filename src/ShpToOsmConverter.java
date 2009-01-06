@@ -141,7 +141,7 @@ public class ShpToOsmConverter {
                                 // Get the outer ring of the polygon
                                 LineString outerLine = geometryN.getExteriorRing();
 
-                                Way w = linestringToWay(outerLine);
+                                Way w = polygonToWay(outerLine);
 
                                 if (geometryN.getNumInteriorRing() > 0) {
                                     // Tags go on the outer way for
@@ -159,7 +159,7 @@ public class ShpToOsmConverter {
                                     for (int j = 0; j < geometryN.getNumInteriorRing(); j++) {
                                         LineString innerLine = geometryN.getInteriorRingN(j);
 
-                                        w = linestringToWay(innerLine);
+                                        w = polygonToWay(innerLine);
 
                                         applyRulesList(feature, geometryType, w, ruleset.getInnerPolygonRules());
 
@@ -266,7 +266,7 @@ public class ShpToOsmConverter {
             }
         }
     }
-
+    
     private static Way linestringToWay(LineString geometryN) {
         Coordinate[] coordinates = geometryN.getCoordinates();
         Way w = new Way();
@@ -276,6 +276,35 @@ public class ShpToOsmConverter {
             w.addNode(node);
         }
 
+        return w;
+    }
+
+    private static Way polygonToWay(LineString geometryN) {
+        Coordinate[] coordinates = geometryN.getCoordinates();
+        if(coordinates.length < 2) {
+            throw new IllegalArgumentException("Way with less than 2 nodes.");
+        }
+        Way w = new Way();
+        
+        // First node for the polygon
+        Coordinate firstCoord = coordinates[0];
+        Node firstNode = new Node(firstCoord.y, firstCoord.x);
+        w.addNode(firstNode);
+
+        // "middle" nodes
+        for (int i = 1; i < coordinates.length-1; i++) {
+            Coordinate coord = coordinates[i];
+
+            Node node = new Node(coord.y, coord.x);
+            w.addNode(node);
+        }
+        
+        // Last node should be the same ID as the first one
+        Coordinate lastCoord = coordinates[coordinates.length-1];
+        if(lastCoord.x == firstCoord.x && lastCoord.y == firstCoord.y) {
+            w.addNode(firstNode);
+        }
+        
         return w;
     }
 
