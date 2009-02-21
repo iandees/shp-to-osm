@@ -1,6 +1,7 @@
-SHP to OSM 0.2
-Copyright Ian Dees, All rights reserved
-05 Jan 2009
+SHP to OSM 0.3Copyright Ian Dees, All rights reserved
+20 Feb 2009
+Project source: http://svn.yellowbkpk.com/geo/trunk/shp-to-osm/
+Project website: http://redmine.yellowbkpk.com/projects/show/geo
 
 Dependencies
 
@@ -33,14 +34,13 @@ Rules file
 
 Running
 
+
  Use the following command line to run the app. Also, you can use the .bat or .sh run files
-to issue the same command as long as you give it the same set of arguments.
+to issue the same command as long as you give it the same set of arguments. The [-t] at the 
+end of the command here is an optional flag to tell the application to onlyinclude ways that
+have had a tag applied to them. For now, it is required to be at the end ofthe arguments list.
 
- The [-t] at the end of the command here is an optional flag to tell the application to only
-include ways that have had a tag applied to them. For now, it is required to be at the end of
-the arguments list.
+ java -cp shp-to-osm-0.3.jar:lib/gt-epsg-wkt-2.5-M3.jar:lib/gt-shapefile-2.5-M3.jar:lib/log4j-1.2.12.jar:lib/gt-epsg-extension-2.5-M3.jar:lib/commons-lang-2.1.jar:lib/jsr-275-1.0-beta-2.jar:lib/jts-1.9.jar:lib/gt-api-2.5-M3.jar:lib/jai_core.jar:lib/gt-metadata-2.5-M3.jar:lib/gt-referencing-2.5-M3.jar:lib/geoapi-2.2-M1.jar:lib/gt-main-2.5-M3.jar Main <path to input shapefile> <path to rules file> <path to output osm file> [-t]
 
- java -cp shp-to-osm-0.1.jar:lib/gt-epsg-wkt-2.5-M3.jar:lib/gt-shapefile-2.5-M3.jar:lib/log4j-1.2.12.jar:lib/gt-epsg-extension-2.5-M3.jar:lib/commons-lang-2.1.jar:lib/jsr-275-1.0-beta-2.jar:lib/jts-1.9.jar:lib/gt-api-2.5-M3.jar:lib/jai_core.jar:lib/gt-metadata-2.5-M3.jar:lib/gt-referencing-2.5-M3.jar:lib/geoapi-2.2-M1.jar:lib/gt-main-2.5-M3.jar Main <path to input shapefile> <path to rules file> <path to output osm file> [-t]
- 
 Known Issues
- - The app does not read point data right now.
+ - There is a maximum of 15000 nodes in a way. Long ways are not split into smaller ones.
