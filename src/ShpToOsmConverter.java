@@ -47,6 +47,10 @@ import java.util.Map;
 
 public class ShpToOsmConverter {
 
+    /**
+     * 
+     */
+    private static final int MAX_NODES_IN_WAY = 15000;
     private File inputFile;
     private File outputFile;
     private RuleSet ruleset;
@@ -90,7 +94,13 @@ public class ShpToOsmConverter {
             ShapefileDataStore dataStore = (ShapefileDataStore) DataStoreFinder.getDataStore(connectParameters);
 
             CoordinateReferenceSystem sourceCRS = dataStore.getSchema().getCoordinateReferenceSystem();
-            System.err.println("Converting from " + sourceCRS + " to " + targetCRS);
+            if (sourceCRS == null) {
+                System.err
+                        .println("Could not determine the shapefile's projection. More than likely, the .prj file was not included.");
+                System.exit(-1);
+            } else {
+                System.err.println("Converting from " + sourceCRS + " to " + targetCRS);
+            }
 
             // we are now connected
             String[] typeNames = dataStore.getTypeNames();
@@ -107,96 +117,102 @@ public class ShpToOsmConverter {
 
                 try {
                     while (iterator.hasNext()) {
-                        SimpleFeature feature = iterator.next();
-
-                        Geometry rawGeom = (Geometry) feature.getDefaultGeometry();
-                        String geometryType = rawGeom.getGeometryType();
-
-                        // Transform to spherical mercator
-                        Geometry geometry = null;
                         try {
-                            MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS, true);
-                            geometry = JTS.transform(rawGeom, transform);
-                        } catch (FactoryException e) {
-                            e.printStackTrace();
-                        } catch (TransformException e) {
-                            e.printStackTrace();
-                        }
-                        // geometry = rawGeom;
+                            SimpleFeature feature = iterator.next();
 
-                        System.err.println("Geometry type: " + geometryType);
+                            Geometry rawGeom = (Geometry) feature.getDefaultGeometry();
+                            String geometryType = rawGeom.getGeometryType();
 
-                        if ("MultiLineString".equals(geometryType)) {
-
-                            for (int i = 0; i < geometry.getNumGeometries(); i++) {
-                                LineString geometryN = (LineString) geometry.getGeometryN(i);
-
-                                Way w = linestringToWay(geometryN);
-                                applyRulesList(feature, geometryType, w, ruleset.getLineRules());
-                                if (shouldInclude(w)) {
-                                    osmOut.addWay(w);
-                                }
+                            // Transform to spherical mercator
+                            Geometry geometry = null;
+                            try {
+                                MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS, true);
+                                geometry = JTS.transform(rawGeom, transform);
+                            } catch (FactoryException e) {
+                                e.printStackTrace();
+                            } catch (TransformException e) {
+                                e.printStackTrace();
                             }
+                            // geometry = rawGeom;
 
-                        } else if ("MultiPolygon".equals(geometryType)) {
+                            System.err.println("Geometry type: " + geometryType);
 
-                            for (int i = 0; i < geometry.getNumGeometries(); i++) {
-                                Polygon geometryN = (Polygon) geometry.getGeometryN(i);
+                            if ("MultiLineString".equals(geometryType)) {
 
-                                // Get the outer ring of the polygon
-                                LineString outerLine = geometryN.getExteriorRing();
+                                for (int i = 0; i < geometry.getNumGeometries(); i++) {
+                                    LineString geometryN = (LineString) geometry.getGeometryN(i);
 
-                                Way w = polygonToWay(outerLine);
-
-                                if (geometryN.getNumInteriorRing() > 0) {
-                                    // Tags go on the outer way for
-                                    // multipolygons
-
-                                    applyRulesList(feature, geometryType, w, ruleset.getOuterPolygonRules());
-
-                                    if (shouldInclude(w)) {
-                                        Relation r = new Relation();
-
-                                        r.addTag(new Tag("type", "multipolygon"));
-
-                                        r.addMember(new Member(w, "outer"));
-
-                                        // Then the inner ones, if any
-                                        for (int j = 0; j < geometryN.getNumInteriorRing(); j++) {
-                                            LineString innerLine = geometryN.getInteriorRingN(j);
-
-                                            w = polygonToWay(innerLine);
-
-                                            applyRulesList(feature, geometryType, w, ruleset.getInnerPolygonRules());
-
-                                            r.addMember(new Member(w, "inner"));
-
-                                        }
-
-                                        osmOut.addRelation(r);
-                                    }
-                                } else {
-                                    // If there aren't any inner lines, then
-                                    // just use the outer one as a way.
-                                    applyRulesList(feature, geometryType, w, ruleset.getOuterPolygonRules());
-
+                                    Way w = linestringToWay(geometryN);
+                                    applyRulesList(feature, geometryType, w, ruleset.getLineRules());
                                     if (shouldInclude(w)) {
                                         osmOut.addWay(w);
                                     }
                                 }
-                            }
-                        } else if ("Point".equals(geometryType)) {
-                            for (int i = 0; i < geometry.getNumGeometries(); i++) {
-                                Point geometryN = (Point) geometry.getGeometryN(i);
 
-                                Node n = pointToNode(geometryN);
+                            } else if ("MultiPolygon".equals(geometryType)) {
 
-                                applyRulesList(feature, geometryType, n, ruleset.getPointRules());
+                                for (int i = 0; i < geometry.getNumGeometries(); i++) {
+                                    Polygon geometryN = (Polygon) geometry.getGeometryN(i);
 
-                                if (shouldInclude(n)) {
-                                    osmOut.addNode(n);
+                                    // Get the outer ring of the polygon
+                                    LineString outerLine = geometryN.getExteriorRing();
+
+                                    Way w = polygonToWay(outerLine);
+
+                                    if (geometryN.getNumInteriorRing() > 0) {
+                                        // Tags go on the outer way for
+                                        // multipolygons
+
+                                        applyRulesList(feature, geometryType, w, ruleset.getOuterPolygonRules());
+
+                                        if (shouldInclude(w)) {
+                                            Relation r = new Relation();
+
+                                            r.addTag(new Tag("type", "multipolygon"));
+
+                                            r.addMember(new Member(w, "outer"));
+
+                                            // Then the inner ones, if any
+                                            for (int j = 0; j < geometryN.getNumInteriorRing(); j++) {
+                                                LineString innerLine = geometryN.getInteriorRingN(j);
+
+                                                w = polygonToWay(innerLine);
+
+                                                applyRulesList(feature, geometryType, w, ruleset
+                                                        .getInnerPolygonRules());
+
+                                                r.addMember(new Member(w, "inner"));
+
+                                            }
+
+                                            osmOut.addRelation(r);
+                                        }
+                                    } else {
+                                        // If there aren't any inner lines, then
+                                        // just use the outer one as a way.
+                                        applyRulesList(feature, geometryType, w, ruleset.getOuterPolygonRules());
+
+                                        if (shouldInclude(w)) {
+                                            osmOut.addWay(w);
+                                        }
+                                    }
+                                }
+                            } else if ("Point".equals(geometryType)) {
+                                for (int i = 0; i < geometry.getNumGeometries(); i++) {
+                                    Point geometryN = (Point) geometry.getGeometryN(i);
+
+                                    Node n = pointToNode(geometryN);
+
+                                    applyRulesList(feature, geometryType, n, ruleset.getPointRules());
+
+                                    if (shouldInclude(n)) {
+                                        osmOut.addNode(n);
+                                    }
                                 }
                             }
+                        } catch (IllegalArgumentException e) {
+                            System.err.println("Skipping a geometry becase:");
+                            e.printStackTrace();
                         }
                     }
                 } catch (MismatchedDimensionException e) {
@@ -305,6 +321,11 @@ public class ShpToOsmConverter {
     
     private static Way linestringToWay(LineString geometryN) {
         Coordinate[] coordinates = geometryN.getCoordinates();
+        
+        if(coordinates.length > 10000) {
+            throw new IllegalArgumentException("Line has too many nodes (" + coordinates.length + " > " + 10000);
+        }
+        
         Way w = new Way();
 
         for (Coordinate coord : coordinates) {
@@ -320,6 +341,11 @@ public class ShpToOsmConverter {
         if(coordinates.length < 2) {
             throw new IllegalArgumentException("Way with less than 2 nodes.");
         }
+        
+        if(coordinates.length > MAX_NODES_IN_WAY) {
+            throw new IllegalArgumentException("Polygon has too many nodes (" + coordinates.length + " > " + MAX_NODES_IN_WAY);
+        }
+        
         Way w = new Way();
         
         // First node for the polygon
