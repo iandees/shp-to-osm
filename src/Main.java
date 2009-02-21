@@ -58,6 +58,11 @@ public class Main {
                 continue;
             }
             
+            // Skip empty lines
+            if("".equals(line)) {
+                continue;
+            }
+            
             String[] splits = line.split(",", 5);
             if (splits.length == 5) {
                 String type = splits[0];
