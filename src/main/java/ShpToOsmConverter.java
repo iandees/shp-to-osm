@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.Writer;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -50,7 +51,7 @@ public class ShpToOsmConverter {
     /**
      * 
      */
-    private static final int MAX_NODES_IN_WAY = 15000;
+    private static final int MAX_NODES_IN_WAY = 2000;
     private File inputFile;
     private File outputFile;
     private RuleSet ruleset;
@@ -140,14 +141,19 @@ public class ShpToOsmConverter {
                             if ("MultiLineString".equals(geometryType)) {
 
                                 for (int i = 0; i < geometry.getNumGeometries(); i++) {
-                                    LineString geometryN = (LineString) geometry.getGeometryN(i);
+									LineString geometryN = (LineString) geometry
+											.getGeometryN(i);
 
-                                    Way w = linestringToWay(geometryN);
-                                    applyRulesList(feature, geometryType, w, ruleset.getLineRules());
-                                    if (shouldInclude(w)) {
-                                        osmOut.addWay(w);
-                                    }
-                                }
+									List<Way> ways = linestringToWays(geometryN);
+									applyRulesList(feature, geometryType, ways,
+											ruleset.getLineRules());
+									for (Way way : ways) {
+
+										if (shouldInclude(way)) {
+											osmOut.addWay(way);
+										}
+									}
+								}
 
                             } else if ("MultiPolygon".equals(geometryType)) {
 
@@ -157,56 +163,68 @@ public class ShpToOsmConverter {
                                     // Get the outer ring of the polygon
                                     LineString outerLine = geometryN.getExteriorRing();
 
-                                    Way w = polygonToWay(outerLine);
+                                    List<Way> outerWays = polygonToWays(outerLine);
 
                                     if (geometryN.getNumInteriorRing() > 0) {
-                                        // Tags go on the outer way for
-                                        // multipolygons
+                                        // Tags go on the outer way for multipolygons
 
-                                        applyRulesList(feature, geometryType, w, ruleset.getOuterPolygonRules());
+                                        applyRulesList(feature, geometryType, outerWays, ruleset.getOuterPolygonRules());
 
-                                        if (shouldInclude(w)) {
-                                            Relation r = new Relation();
+                                        Relation r = new Relation();
+                                        r.addTag(new Tag("type", "multipolygon"));
 
-                                            r.addTag(new Tag("type", "multipolygon"));
+                                        for (Primitive outerWay : outerWays) {
 
-                                            r.addMember(new Member(w, "outer"));
+                                            if (shouldInclude(outerWay)) {
 
-                                            // Then the inner ones, if any
-                                            for (int j = 0; j < geometryN.getNumInteriorRing(); j++) {
-                                                LineString innerLine = geometryN.getInteriorRingN(j);
+                                                r.addMember(new Member(outerWay, "outer"));
+                                            }
+                                        }
 
-                                                w = polygonToWay(innerLine);
+                                        // Then the inner ones, if any
+                                        for (int j = 0; j < geometryN.getNumInteriorRing(); j++) {
+                                            LineString innerLine = geometryN.getInteriorRingN(j);
 
-                                                applyRulesList(feature, geometryType, w, ruleset
-                                                        .getInnerPolygonRules());
+                                            List<Way> innerWays = polygonToWays(innerLine);
 
-                                                r.addMember(new Member(w, "inner"));
-
+                                            applyRulesList(feature, geometryType, innerWays, ruleset
+                                                    .getInnerPolygonRules());
+                                            
+                                            for (Way innerWay : innerWays) {
+                                                r.addMember(new Member(innerWay, "inner"));
                                             }
 
-                                            osmOut.addRelation(r);
                                         }
+
+                                        osmOut.addRelation(r);
+
                                     } else {
                                         // If there aren't any inner lines, then
                                         // just use the outer one as a way.
-                                        applyRulesList(feature, geometryType, w, ruleset.getOuterPolygonRules());
+                                        applyRulesList(feature, geometryType, outerWays, ruleset.getOuterPolygonRules());
 
-                                        if (shouldInclude(w)) {
-                                            osmOut.addWay(w);
+                                        for (Way outerWay : outerWays) {
+                                            if (shouldInclude(outerWay)) {
+                                                osmOut.addWay(outerWay);
+                                            }
                                         }
                                     }
                                 }
                             } else if ("Point".equals(geometryType)) {
+                                List<Node> nodes = new ArrayList<Node>(geometry.getNumGeometries());
                                 for (int i = 0; i < geometry.getNumGeometries(); i++) {
                                     Point geometryN = (Point) geometry.getGeometryN(i);
 
                                     Node n = pointToNode(geometryN);
 
-                                    applyRulesList(feature, geometryType, n, ruleset.getPointRules());
+                                    nodes.add(n);
+                                }
 
-                                    if (shouldInclude(n)) {
-                                        osmOut.addNode(n);
+                                applyRulesList(feature, geometryType, nodes, ruleset.getPointRules());
+
+                                for (Node node : nodes) {
+                                    if (shouldInclude(node)) {
+                                        osmOut.addNode(node);
                                     }
                                 }
                             }
@@ -278,10 +296,10 @@ public class ShpToOsmConverter {
     /**
      * @param feature
      * @param geometryType
-     * @param w
+     * @param features
      * @param rulelist
      */
-    private void applyRulesList(SimpleFeature feature, String geometryType, Primitive w, List<Rule> rulelist) {
+    private void applyRulesList(SimpleFeature feature, String geometryType, List<? extends Primitive> features, List<Rule> rulelist) {
         Collection<Property> properties = feature.getProperties();
         for (Property property : properties) {
             String srcKey = property.getType().getName().toString();
@@ -297,7 +315,9 @@ public class ShpToOsmConverter {
                         for (Rule rule : rulelist) {
                             Tag t = rule.createTag(srcKey, escapedOriginalValue);
                             if (t != null) {
-                                w.addTag(t);
+                            	for (Primitive primitive : features) {
+									primitive.addTag(t);
+								}
                             }
                         }
                     }
@@ -319,55 +339,82 @@ public class ShpToOsmConverter {
         }
     }
     
-    private static Way linestringToWay(LineString geometryN) {
+    private static List<Way> linestringToWays(LineString geometryN) {
         Coordinate[] coordinates = geometryN.getCoordinates();
         
-        if(coordinates.length > 10000) {
-            throw new IllegalArgumentException("Line has too many nodes (" + coordinates.length + " > " + 10000);
-        }
-        
-        Way w = new Way();
+        // Follow the 2000 nodes per way max rule
+        int waysToCreate = coordinates.length / MAX_NODES_IN_WAY;
+        waysToCreate += (coordinates.length % MAX_NODES_IN_WAY == 0) ? 0 : 1;
 
+        List<Way> ways = new ArrayList<Way>(waysToCreate);
+        
+        Way way = new Way();
+
+        int nodeCount = 0;
         for (Coordinate coord : coordinates) {
             Node node = new Node(coord.y, coord.x);
-            w.addNode(node);
+            way.addNode(node);
+            
+            if(++nodeCount % MAX_NODES_IN_WAY == 0) {
+            	ways.add(way);
+            	way = new Way();
+            	way.addNode(node);
+            }
+        }
+        
+        // Add the last way to the list of ways
+        if(way.nodeCount() > 0) {
+        	ways.add(way);
         }
 
-        return w;
+        return ways;
     }
 
-    private static Way polygonToWay(LineString geometryN) {
+    private static List<Way> polygonToWays(LineString geometryN) {
         Coordinate[] coordinates = geometryN.getCoordinates();
         if(coordinates.length < 2) {
             throw new IllegalArgumentException("Way with less than 2 nodes.");
         }
+
+        // Follow the 2000 max nodes per way rule
+        int waysToCreate = coordinates.length / MAX_NODES_IN_WAY;
+        waysToCreate += (coordinates.length % MAX_NODES_IN_WAY == 0) ? 0 : 1;
+
+        List<Way> ways = new ArrayList<Way>(waysToCreate);
         
-        if(coordinates.length > MAX_NODES_IN_WAY) {
-            throw new IllegalArgumentException("Polygon has too many nodes (" + coordinates.length + " > " + MAX_NODES_IN_WAY);
-        }
-        
-        Way w = new Way();
+        Way way = new Way();
         
         // First node for the polygon
         Coordinate firstCoord = coordinates[0];
         Node firstNode = new Node(firstCoord.y, firstCoord.x);
-        w.addNode(firstNode);
+        way.addNode(firstNode);
 
         // "middle" nodes
         for (int i = 1; i < coordinates.length-1; i++) {
             Coordinate coord = coordinates[i];
 
             Node node = new Node(coord.y, coord.x);
-            w.addNode(node);
+            way.addNode(node);
+            
+            if(i % (MAX_NODES_IN_WAY - 1) == 0) {
+            	ways.add(way);
+            	way = new Way();
+            	way.addNode(node);
+            }
         }
         
         // Last node should be the same ID as the first one
         Coordinate lastCoord = coordinates[coordinates.length-1];
         if(lastCoord.x == firstCoord.x && lastCoord.y == firstCoord.y) {
-            w.addNode(firstNode);
+            way.addNode(firstNode);
         }
         
-        return w;
+        // Add the last way to the list of ways
+        if(way.nodeCount() > 0) {
+        	ways.add(way);
+        }
+        
+        return ways;
     }
 
     private static void outputRelations(Writer out, Iterator<Relation> relationIter) throws IOException {

@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class Way extends Primitive {
 
-    private List<Node> nodeList = new ArrayList<Node>();
+    private List<Node> nodeList = new ArrayList<Node>(1000);
     
     public void addNode(Node node) {
         node.setID(IDGenerator.nextNodeID());
@@ -27,5 +27,9 @@ public class Way extends Primitive {
     public PrimitiveTypeEnum getType() {
         return PrimitiveTypeEnum.way;
     }
+
+	public int nodeCount() {
+		return nodeList.size();
+	}
 
 }
