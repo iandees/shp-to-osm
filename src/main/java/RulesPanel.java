@@ -109,7 +109,6 @@ public class RulesPanel extends JPanel {
     }
 
     protected void addNewRule() {
-        rulesTableModel.addRule(new Rule());
     }
 }
 
