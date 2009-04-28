@@ -39,23 +39,27 @@ import java.io.Serializable;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.event.ListSelectionEvent;
+
 
 public class ShpToOsmConverter {
 
-    /**
-     * 
-     */
     private static final int MAX_NODES_IN_WAY = 2000;
+    private static final int MAX_ELEMENTS = 20000;
+    private static final double LOADING_FACTOR = 1.05;
     private File inputFile;
     private File outputFile;
     private RuleSet ruleset;
     private boolean onlyIncludeTaggedPrimitives;
+    private int filesCreated = 0;
+    private static int elements;
 
     /**
      * @param shpFile
@@ -103,6 +107,8 @@ public class ShpToOsmConverter {
                 System.err.println("Converting from " + sourceCRS + " to " + targetCRS);
             }
 
+            elements = 0;
+
             // we are now connected
             String[] typeNames = dataStore.getTypeNames();
             for (String typeName : typeNames) {
@@ -122,6 +128,15 @@ public class ShpToOsmConverter {
                             SimpleFeature feature = iterator.next();
 
                             Geometry rawGeom = (Geometry) feature.getDefaultGeometry();
+                            
+                            int approxElementsThatWillBeAdded = (int) (rawGeom.getNumPoints() * LOADING_FACTOR);
+                            if(elements + approxElementsThatWillBeAdded > MAX_ELEMENTS) {
+                                saveOsmOut(osmOut);
+                                osmOut = new OSMFile();
+                                filesCreated++;
+                                elements = 0;
+                            }
+                            
                             String geometryType = rawGeom.getGeometryType();
 
                             // Transform to spherical mercator
@@ -166,12 +181,12 @@ public class ShpToOsmConverter {
                                     List<Way> outerWays = polygonToWays(outerLine);
 
                                     if (geometryN.getNumInteriorRing() > 0) {
-                                        // Tags go on the outer way for multipolygons
-
-                                        applyRulesList(feature, geometryType, outerWays, ruleset.getOuterPolygonRules());
-
                                         Relation r = new Relation();
                                         r.addTag(new Tag("type", "multipolygon"));
+                                        
+                                        // Tags go on the relation for multipolygons
+
+                                        applyRulesList(feature, geometryType, Arrays.asList(r), ruleset.getOuterPolygonRules());
 
                                         for (Primitive outerWay : outerWays) {
 
@@ -197,6 +212,7 @@ public class ShpToOsmConverter {
                                         }
 
                                         osmOut.addRelation(r);
+                                        elements++;
 
                                     } else {
                                         // If there aren't any inner lines, then
@@ -206,6 +222,7 @@ public class ShpToOsmConverter {
                                         for (Way outerWay : outerWays) {
                                             if (shouldInclude(outerWay)) {
                                                 osmOut.addWay(outerWay);
+                                                elements++;
                                             }
                                         }
                                     }
@@ -225,6 +242,7 @@ public class ShpToOsmConverter {
                                 for (Node node : nodes) {
                                     if (shouldInclude(node)) {
                                         osmOut.addNode(node);
+                                        elements++;
                                     }
                                 }
                             }
@@ -250,14 +268,19 @@ public class ShpToOsmConverter {
             e.printStackTrace();
         }
 
-        System.err.println("Writing out to file.");
+        saveOsmOut(osmOut);
+    }
+
+    private void saveOsmOut(OSMFile osmOut) {
+        File actualOutput = new File(outputFile.getName() + filesCreated + ".osm");
+        System.err.println("Writing out to file named " + actualOutput + ".");
 
         // Now write out the file
         try {
-            FileWriter bos = new FileWriter(outputFile);
+            FileWriter bos = new FileWriter(actualOutput);
 
             bos.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-            bos.write("<osm version=\"0.5\" generator=\"SHP to OSM 0.3\">\n");
+            bos.write("<osm version=\"0.5\" generator=\"SHP to OSM 0.4\">\n");
 
             Iterator<Node> nodeIter = osmOut.getNodeIterator();
             outputNodes(bos, nodeIter);
@@ -270,6 +293,7 @@ public class ShpToOsmConverter {
 
             bos.write("</osm>\n");
 
+            bos.flush();
             bos.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -359,12 +383,14 @@ public class ShpToOsmConverter {
             	ways.add(way);
             	way = new Way();
             	way.addNode(node);
+            	elements++;
             }
         }
         
         // Add the last way to the list of ways
         if(way.nodeCount() > 0) {
         	ways.add(way);
+            elements++;
         }
 
         return ways;
@@ -395,11 +421,13 @@ public class ShpToOsmConverter {
 
             Node node = new Node(coord.y, coord.x);
             way.addNode(node);
+            elements++;
             
             if(i % (MAX_NODES_IN_WAY - 1) == 0) {
             	ways.add(way);
             	way = new Way();
             	way.addNode(node);
+                elements++;
             }
         }
         
@@ -412,6 +440,7 @@ public class ShpToOsmConverter {
         // Add the last way to the list of ways
         if(way.nodeCount() > 0) {
         	ways.add(way);
+            elements++;
         }
         
         return ways;

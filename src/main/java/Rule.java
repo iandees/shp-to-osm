@@ -44,7 +44,7 @@ public class Rule {
             // If they list a source key value, then only create the tag if their key
             // value matches ours
             if (srcValue != null) {
-                if (originalValue.equals(this.srcValue)) {
+                if (originalValue.contains(this.srcValue)) {
                     key = targetKey;
 
                     if (useOriginalValue) {
