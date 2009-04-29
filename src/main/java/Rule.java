@@ -1,4 +1,4 @@
-import osm.Tag;
+import osm.primitive.Tag;
 
 public class Rule {
 

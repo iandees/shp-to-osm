@@ -17,13 +17,13 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
-import osm.Member;
-import osm.Node;
 import osm.OSMFile;
-import osm.Primitive;
-import osm.Relation;
-import osm.Tag;
-import osm.Way;
+import osm.primitive.Primitive;
+import osm.primitive.Tag;
+import osm.primitive.node.Node;
+import osm.primitive.relation.Member;
+import osm.primitive.relation.Relation;
+import osm.primitive.way.Way;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
