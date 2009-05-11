@@ -130,6 +130,7 @@ public class ShpToOsmConverter {
                             Geometry rawGeom = (Geometry) feature.getDefaultGeometry();
                             
                             int approxElementsThatWillBeAdded = (int) (rawGeom.getNumPoints() * LOADING_FACTOR);
+                            System.err.println("Approx new points: " + approxElementsThatWillBeAdded + "  Total so far: " + elements);
                             if(elements + approxElementsThatWillBeAdded > MAX_ELEMENTS) {
                                 saveOsmOut(osmOut);
                                 osmOut = new OSMFile();
@@ -215,14 +216,35 @@ public class ShpToOsmConverter {
                                         elements++;
 
                                     } else {
-                                        // If there aren't any inner lines, then
-                                        // just use the outer one as a way.
-                                        applyRulesList(feature, geometryType, outerWays, ruleset.getOuterPolygonRules());
+                                        // If there's more than one way, then it
+                                        // needs to be a multipolygon and the
+                                        // tags need to be applied to the
+                                        // relation
+                                        if(outerWays.size() > 1) {
+                                            Relation r = new Relation();
+                                            r.addTag(new Tag("type", "multipolygon"));
 
-                                        for (Way outerWay : outerWays) {
-                                            if (shouldInclude(outerWay)) {
-                                                osmOut.addWay(outerWay);
-                                                elements++;
+                                            applyRulesList(feature, geometryType, r, ruleset
+                                                    .getOuterPolygonRules());
+
+                                            for (Way outerWay : outerWays) {
+                                                if (shouldInclude(outerWay)) {
+                                                    r.addMember(new Member(outerWay, "outer"));
+                                                }
+                                            }
+                                            
+                                            osmOut.addRelation(r);
+                                            elements++;
+                                        } else {
+                                            // If there aren't any inner lines, then
+                                            // just use the outer one as a way.
+                                            applyRulesList(feature, geometryType, outerWays, ruleset
+                                                    .getOuterPolygonRules());
+
+                                            for (Way outerWay : outerWays) {
+                                                if (shouldInclude(outerWay)) {
+                                                    osmOut.addWay(outerWay);
+                                                }
                                             }
                                         }
                                     }
@@ -323,7 +345,8 @@ public class ShpToOsmConverter {
      * @param features
      * @param rulelist
      */
-    private void applyRulesList(SimpleFeature feature, String geometryType, List<? extends Primitive> features, List<Rule> rulelist) {
+    private void applyRulesList(SimpleFeature feature, String geometryType, List<? extends Primitive> features,
+            List<Rule> rulelist) {
         Collection<Property> properties = feature.getProperties();
         for (Property property : properties) {
             String srcKey = property.getType().getName().toString();
@@ -348,6 +371,10 @@ public class ShpToOsmConverter {
                 }
             }
         }
+    }
+    
+    private void applyRulesList(SimpleFeature feature, String geometryType, Primitive features, List<Rule> rulelist) {
+        applyRulesList(feature, geometryType, Arrays.asList(features), rulelist);
     }
 
     private static void applyOriginalTagsTo(SimpleFeature feature, String geometryType, Primitive w) {
@@ -378,6 +405,7 @@ public class ShpToOsmConverter {
         for (Coordinate coord : coordinates) {
             Node node = new Node(coord.y, coord.x);
             way.addNode(node);
+            elements++;
             
             if(++nodeCount % MAX_NODES_IN_WAY == 0) {
             	ways.add(way);
