@@ -52,7 +52,7 @@ import javax.swing.event.ListSelectionEvent;
 public class ShpToOsmConverter {
 
     private static final int MAX_NODES_IN_WAY = 2000;
-    private static final int MAX_ELEMENTS = 20000;
+    private static final int MAX_ELEMENTS = 50000;
     private static final double LOADING_FACTOR = 1.05;
     private File inputFile;
     private File outputFile;
@@ -131,7 +131,7 @@ public class ShpToOsmConverter {
                             
                             int approxElementsThatWillBeAdded = (int) (rawGeom.getNumPoints() * LOADING_FACTOR);
                             System.err.println("Approx new points: " + approxElementsThatWillBeAdded + "  Total so far: " + elements);
-                            if(elements + approxElementsThatWillBeAdded > MAX_ELEMENTS) {
+                            if(elements > 0 && elements + approxElementsThatWillBeAdded > MAX_ELEMENTS) {
                                 saveOsmOut(osmOut);
                                 osmOut = new OSMFile();
                                 filesCreated++;
