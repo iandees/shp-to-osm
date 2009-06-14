@@ -39,12 +39,17 @@
 		<repository>
 			<id>geotools</id>
 			<name>GeoTools</name>
-			<url>http://repo.opengeo.org/</url>
+			<url>http://repo.opengeo.org</url>
 		</repository>
 		<repository>
 			<id>geotools-fr</id>
 			<name>GeoTools-FR</name>
-			<url>http://maven.geotools.fr/repository/</url>
+			<url>http://maven.geotools.fr/repository</url>
+		</repository>
+		<repository>
+			<id>java.net</id>
+			<name>Java.net</name>
+			<url>http://download.java.net/maven/2</url>
 		</repository>
 	</repositories>
 	<dependencies>
