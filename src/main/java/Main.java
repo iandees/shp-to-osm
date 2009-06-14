@@ -3,6 +3,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 /**
  * @author Ian Dees
  * 
@@ -68,8 +70,8 @@ public class Main {
                 String type = splits[0];
                 String srcKey = splits[1];
                 String srcValue = splits[2];
-                String targetKey = splits[3];
-                String targetValue = splits[4];
+                String targetKey = StringEscapeUtils.escapeXml(splits[3]);
+                String targetValue = StringEscapeUtils.escapeXml(splits[4]);
 
                 Rule r;
 
@@ -97,7 +99,7 @@ public class Main {
                     System.err.println("Line " + lineCount + ": Unknown type " + type);
                 }
             } else {
-                throw new IllegalArgumentException("Could not parse line " + lineCount + ". Had " + splits.length
+                throw new IllegalArgumentException("Could not parse line " + lineCount + ":\"" + line + "\". Had " + splits.length
                         + " pieces and expected 5.");
             }
         }
