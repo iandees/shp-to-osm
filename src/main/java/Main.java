@@ -55,13 +55,15 @@ public class Main {
         while ((line = br.readLine()) != null) {
             lineCount++;
             
+            String trimmedLine = line.trim();
+            
             // Skip comments
-            if(line.startsWith("#")) {
+            if(trimmedLine.startsWith("#")) {
                 continue;
             }
             
             // Skip empty lines
-            if("".equals(line)) {
+            if("".equals(trimmedLine)) {
                 continue;
             }
             
@@ -86,7 +88,7 @@ public class Main {
                     r = new Rule(type, srcKey, srcValue, targetKey, targetValue);
                 }
 
-                System.err.println("Adding " + r);
+                System.err.println("Adding rule " + r);
                 if ("inner".equals(type)) {
                     rules.addInnerPolygonRule(r);
                 } else if ("outer".equals(type)) {
@@ -99,8 +101,9 @@ public class Main {
                     System.err.println("Line " + lineCount + ": Unknown type " + type);
                 }
             } else {
-                throw new IllegalArgumentException("Could not parse line " + lineCount + ":\"" + line + "\". Had " + splits.length
+                System.err.println("Skipped line " + lineCount + ": \"" + line + "\". Had " + splits.length
                         + " pieces and expected 5.");
+                continue;
             }
         }
         
