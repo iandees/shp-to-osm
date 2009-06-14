@@ -32,6 +32,7 @@ public class Main {
             ShpToOsmConverter conv = new ShpToOsmConverter(shpFile, rules, osmFile, keepOnlyTaggedWays);
             conv.go();
         } catch (IOException e) {
+            System.err.println("java -cp shp-to-osm.jar Main <input shapefile name> <input rules file name> <output osm file name> [-t]");
             e.printStackTrace();
         }
         
