@@ -59,16 +59,19 @@ public class ShpToOsmConverter {
     private RuleSet ruleset;
     private boolean onlyIncludeTaggedPrimitives;
     private int filesCreated = 0;
+    private int maxElements = MAX_ELEMENTS;
     private static int elements;
 
     /**
      * @param shpFile
      * @param rules
      * @param osmFile
+     * @param maxNodesPerFile 
      */
-    public ShpToOsmConverter(File shpFile, RuleSet rules, File osmFile, boolean onlyIncludeTaggedPrim) {
+    public ShpToOsmConverter(File shpFile, RuleSet rules, File osmFile, boolean onlyIncludeTaggedPrim, int maxNodesPerFile) {
         inputFile = shpFile;
         outputFile = osmFile;
+        maxElements = maxNodesPerFile;
         
         ruleset = rules;
         onlyIncludeTaggedPrimitives = onlyIncludeTaggedPrim;
@@ -131,7 +134,7 @@ public class ShpToOsmConverter {
                             
                             int approxElementsThatWillBeAdded = (int) (rawGeom.getNumPoints() * LOADING_FACTOR);
                             System.err.println("Approx new points: " + approxElementsThatWillBeAdded + "  Total so far: " + elements);
-                            if(elements > 0 && elements + approxElementsThatWillBeAdded > MAX_ELEMENTS) {
+                            if(elements > 0 && elements + approxElementsThatWillBeAdded > maxElements) {
                                 saveOsmOut(osmOut);
                                 osmOut = new OSMFile();
                                 filesCreated++;

@@ -1,25 +1,13 @@
-SHP to OSM 0.3Copyright Ian Dees, All rights reserved
-20 Feb 2009
+SHP to OSM 0.5
+Copyright Ian Dees, All rights reserved
+02 Aug 2009
 Project source: http://svn.yellowbkpk.com/geo/trunk/shp-to-osm/
 Project website: http://redmine.yellowbkpk.com/projects/show/geo
 
 Dependencies
 
- - GeoTools 2.5 RC0: http://downloads.sourceforge.net/geotools/geotools-2.5-RC0-bin.zip
-   The following jars from the above zip file are needed in the build path:
-    gt-epsg-wkt-2.5-M3.jar
-    gt-shapefile-2.5-M3.jar
-    log4j-1.2.12.jar
-    gt-epsg-extension-2.5-M3.jar
-    commons-lang-2.1.jar
-    jsr-275-1.0-beta-2.jar
-    jts-1.9.jar
-    gt-api-2.5-M3.jar
-    jai_core.jar
-    gt-metadata-2.5-M3.jar
-    gt-referencing-2.5-M3.jar
-    geoapi-2.2-M1.jar
-    gt-main-2.5-M3.jar
+ Dependencies are handled by the Maven pom.xml file included. The JAR distributed at the above
+ site includes all of the required classfiles to run out of the box.
 
 Rules file
 
@@ -40,7 +28,8 @@ to issue the same command as long as you give it the same set of arguments. The 
 end of the command here is an optional flag to tell the application to onlyinclude ways that
 have had a tag applied to them. For now, it is required to be at the end ofthe arguments list.
 
- java -cp shp-to-osm-0.3.jar:lib/gt-epsg-wkt-2.5-M3.jar:lib/gt-shapefile-2.5-M3.jar:lib/log4j-1.2.12.jar:lib/gt-epsg-extension-2.5-M3.jar:lib/commons-lang-2.1.jar:lib/jsr-275-1.0-beta-2.jar:lib/jts-1.9.jar:lib/gt-api-2.5-M3.jar:lib/jai_core.jar:lib/gt-metadata-2.5-M3.jar:lib/gt-referencing-2.5-M3.jar:lib/geoapi-2.2-M1.jar:lib/gt-main-2.5-M3.jar Main <path to input shapefile> <path to rules file> <path to output osm file> [-t]
-
-Known Issues
- - There is a maximum of 15000 nodes in a way. Long ways are not split into smaller ones.
+ java -cp shp-to-osm-0.5.jar Main --shapefile <path to input shapefile> \
+                                  --rulesfile <path to rules file> \
+                                  --osmfile <path to output osm file> \
+                                  [--maxnodes <max nodes per osm file>]
+                                  [-t]
