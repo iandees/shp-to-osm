@@ -91,12 +91,6 @@ public class Main {
             RuleSet rules = readFileToRulesSet(rulesFile);
             
             File osmFile = new File(line.getOptionValue("osmfile"));
-            if(!osmFile.canWrite()) {
-                System.out.println("Could not write the output OSM file.");
-                HelpFormatter formatter = new HelpFormatter();
-                formatter.printHelp("java -cp shp-to-osm.jar", options, true);
-                System.exit(-1);
-            }
             
             ShpToOsmConverter conv = new ShpToOsmConverter(shpFile, rules, osmFile, keepOnlyTaggedWays, maxNodesPerFile);
             conv.go();
