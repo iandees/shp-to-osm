@@ -53,14 +53,13 @@ public class ShpToOsmConverter {
 
     private static final int MAX_NODES_IN_WAY = 2000;
     private static final int MAX_ELEMENTS = 50000;
-    private static final double LOADING_FACTOR = 1.05;
+    private static final double LOADING_FACTOR = 1.25;
     private File inputFile;
     private File outputFile;
     private RuleSet ruleset;
     private boolean onlyIncludeTaggedPrimitives;
     private int filesCreated = 0;
     private int maxElements = MAX_ELEMENTS;
-    private static int elements;
 
     /**
      * @param shpFile
@@ -110,8 +109,6 @@ public class ShpToOsmConverter {
                 System.err.println("Converting from " + sourceCRS + " to " + targetCRS);
             }
 
-            elements = 0;
-
             // we are now connected
             String[] typeNames = dataStore.getTypeNames();
             for (String typeName : typeNames) {
@@ -133,12 +130,13 @@ public class ShpToOsmConverter {
                             Geometry rawGeom = (Geometry) feature.getDefaultGeometry();
                             
                             int approxElementsThatWillBeAdded = (int) (rawGeom.getNumPoints() * LOADING_FACTOR);
-                            System.err.println("Approx new points: " + approxElementsThatWillBeAdded + "  Total so far: " + elements);
-                            if(elements > 0 && elements + approxElementsThatWillBeAdded > maxElements) {
+                            int changes = osmOut.getChangeCount();
+                            System.err.println("Approx new points: " + approxElementsThatWillBeAdded + "  Total so far: " + changes);
+                            if(changes > 0 && changes + approxElementsThatWillBeAdded > maxElements) {
                                 saveOsmOut(osmOut);
                                 osmOut = new OSMFile();
                                 filesCreated++;
-                                elements = 0;
+                                changes = 0;
                             }
                             
                             String geometryType = rawGeom.getGeometryType();
@@ -216,7 +214,6 @@ public class ShpToOsmConverter {
                                         }
 
                                         osmOut.addRelation(r);
-                                        elements++;
 
                                     } else {
                                         // If there's more than one way, then it
@@ -237,7 +234,6 @@ public class ShpToOsmConverter {
                                             }
                                             
                                             osmOut.addRelation(r);
-                                            elements++;
                                         } else {
                                             // If there aren't any inner lines, then
                                             // just use the outer one as a way.
@@ -267,7 +263,6 @@ public class ShpToOsmConverter {
                                 for (Node node : nodes) {
                                     if (shouldInclude(node)) {
                                         osmOut.addNode(node);
-                                        elements++;
                                     }
                                 }
                             }
@@ -408,20 +403,17 @@ public class ShpToOsmConverter {
         for (Coordinate coord : coordinates) {
             Node node = new Node(coord.y, coord.x);
             way.addNode(node);
-            elements++;
             
             if(++nodeCount % MAX_NODES_IN_WAY == 0) {
             	ways.add(way);
             	way = new Way();
             	way.addNode(node);
-            	elements++;
             }
         }
         
         // Add the last way to the list of ways
         if(way.nodeCount() > 0) {
         	ways.add(way);
-            elements++;
         }
 
         return ways;
@@ -452,13 +444,11 @@ public class ShpToOsmConverter {
 
             Node node = new Node(coord.y, coord.x);
             way.addNode(node);
-            elements++;
             
             if(i % (MAX_NODES_IN_WAY - 1) == 0) {
             	ways.add(way);
             	way = new Way();
             	way.addNode(node);
-                elements++;
             }
         }
         
@@ -471,7 +461,6 @@ public class ShpToOsmConverter {
         // Add the last way to the list of ways
         if(way.nodeCount() > 0) {
         	ways.add(way);
-            elements++;
         }
         
         return ways;
