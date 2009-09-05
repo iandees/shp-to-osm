@@ -46,6 +46,11 @@ public class Main {
                 .withArgName("nodes")
                 .hasArg()
                 .create());
+        options.addOption(OptionBuilder.withLongOpt("outputFormat")
+                .withDescription("The output format ('osm' or 'osmc' (default)).")
+                .withArgName("format")
+                .hasArg()
+                .create());
         
         boolean keepOnlyTaggedWays = false;
         try {
@@ -91,8 +96,18 @@ public class Main {
             RuleSet rules = readFileToRulesSet(rulesFile);
             
             File osmFile = new File(line.getOptionValue("osmfile"));
+
+            OSMOutputter outputter = new OSMChangeOutputter();
+            if(line.hasOption("format")) {
+                String type = line.getOptionValue("format");
+                if("osm".equals(type)) {
+                    outputter = new OSMOldOutputter();
+                }
+            } else {
+                System.err.println("No output format specified. Defaulting to osmChange format.");
+            }
             
-            ShpToOsmConverter conv = new ShpToOsmConverter(shpFile, rules, osmFile, keepOnlyTaggedWays, maxNodesPerFile);
+            ShpToOsmConverter conv = new ShpToOsmConverter(shpFile, rules, osmFile, keepOnlyTaggedWays, maxNodesPerFile, outputter);
             conv.go();
         } catch (IOException e) {
             System.err.println("Error reading rules file.");
