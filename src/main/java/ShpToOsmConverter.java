@@ -46,9 +46,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.event.ListSelectionEvent;
-
-
 public class ShpToOsmConverter {
 
     private static final int MAX_NODES_IN_WAY = 2000;
@@ -300,7 +297,8 @@ public class ShpToOsmConverter {
             FileWriter bos = new FileWriter(actualOutput);
 
             bos.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-            bos.write("<osm version=\"0.5\" generator=\"SHP to OSM 0.5\">\n");
+            bos.write("<osmChange version=\"0.6\" generator=\"shp-to-osm 0.5\">\n");
+            bos.write("  <create version=\"0.6\" generator=\"shp-to-osm 0.5\">\n");
 
             Iterator<Node> nodeIter = osmOut.getNodeIterator();
             outputNodes(bos, nodeIter);
@@ -311,7 +309,8 @@ public class ShpToOsmConverter {
             Iterator<Relation> relationIter = osmOut.getRelationIterator();
             outputRelations(bos, relationIter);
 
-            bos.write("</osm>\n");
+            bos.write("  </create>\n");
+            bos.write("</osmChange>\n");
 
             bos.flush();
             bos.close();
@@ -470,7 +469,7 @@ public class ShpToOsmConverter {
         while (relationIter.hasNext()) {
             Relation way = (Relation) relationIter.next();
 
-            out.write("<relation id=\"");
+            out.write("    <relation id=\"");
             out.write(Integer.toString(way.getID()));
             out.write("\">\n");
 
@@ -480,7 +479,7 @@ public class ShpToOsmConverter {
             Iterator<Tag> tagIter = way.getTagIterator();
             outputTags(out, tagIter);
 
-            out.write("</relation>\n");
+            out.write("    </relation>\n");
         }
     }
 
@@ -488,7 +487,7 @@ public class ShpToOsmConverter {
         while (memberIter.hasNext()) {
             Member member = (Member) memberIter.next();
 
-            out.write("<member type=\"");
+            out.write("      <member type=\"");
             out.write(member.getMember().getType().toString());
             out.write("\" ref=\"");
             out.write(Integer.toString(member.getMember().getID()));
@@ -502,7 +501,7 @@ public class ShpToOsmConverter {
         while (wayIter.hasNext()) {
             Way way = (Way) wayIter.next();
 
-            out.write("<way id=\"");
+            out.write("    <way id=\"");
             out.write(Integer.toString(way.getID()));
             out.write("\">\n");
 
@@ -512,7 +511,7 @@ public class ShpToOsmConverter {
             Iterator<Tag> tagIter = way.getTagIterator();
             outputTags(out, tagIter);
 
-            out.write("</way>\n");
+            out.write("    </way>\n");
         }
     }
 
@@ -520,13 +519,9 @@ public class ShpToOsmConverter {
         while (nodeIter.hasNext()) {
             Primitive node = (Primitive) nodeIter.next();
 
-            StringBuilder buf = new StringBuilder();
-
-            buf.append("<nd ref=\"");
-            buf.append(node.getID());
-            buf.append("\"/>\n");
-
-            out.write(buf.toString());
+            out.write("      <nd ref=\"");
+            out.write(Integer.toString(node.getID()));
+            out.write("\"/>\n");
         }
     }
 
@@ -534,28 +529,23 @@ public class ShpToOsmConverter {
         while (nodeIter.hasNext()) {
             Node node = (Node) nodeIter.next();
 
-            StringBuilder buf = new StringBuilder();
-
-            buf.append("<node id=\"");
-            buf.append(node.getID());
-            buf.append("\" lat=\"");
-            buf.append(Double.toString(node.getLat()));
-            buf.append("\" lon=\"");
-            buf.append(Double.toString(node.getLon()));
-            buf.append("\"");
+            out.write("    <node id=\"");
+            out.write(Integer.toString(node.getID()));
+            out.write("\" lat=\"");
+            out.write(Double.toString(node.getLat()));
+            out.write("\" lon=\"");
+            out.write(Double.toString(node.getLon()));
+            out.write("\"");
 
             if (node.hasTags()) {
-                buf.append(">\n");
-
-                out.write(buf.toString());
+                out.write(">\n");
 
                 Iterator<Tag> tagIter = node.getTagIterator();
                 outputTags(out, tagIter);
 
-                out.write("</node>\n");
+                out.write("    </node>\n");
             } else {
-                buf.append("/>\n");
-                out.write(buf.toString());
+                out.write("/>\n");
             }
 
         }
@@ -565,15 +555,11 @@ public class ShpToOsmConverter {
         while (tagIter.hasNext()) {
             Tag tag = (Tag) tagIter.next();
 
-            StringBuilder buf = new StringBuilder();
-
-            buf.append("<tag k=\"");
-            buf.append(tag.getKey());
-            buf.append("\" v=\"");
-            buf.append(tag.getValue());
-            buf.append("\"/>\n");
-
-            out.write(buf.toString());
+            out.write("      <tag k=\"");
+            out.write(tag.getKey());
+            out.write("\" v=\"");
+            out.write(tag.getValue());
+            out.write("\"/>\n");
         }
     }
 
