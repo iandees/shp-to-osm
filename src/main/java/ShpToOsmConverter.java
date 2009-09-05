@@ -305,7 +305,7 @@ public class ShpToOsmConverter {
             FileWriter bos = new FileWriter(actualOutput);
 
             bos.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-            bos.write("<osm version=\"0.5\" generator=\"SHP to OSM 0.4.1\">\n");
+            bos.write("<osm version=\"0.5\" generator=\"SHP to OSM 0.5\">\n");
 
             Iterator<Node> nodeIter = osmOut.getNodeIterator();
             outputNodes(bos, nodeIter);

@@ -1,6 +1,6 @@
 SHP to OSM 0.5
 Copyright Ian Dees, All rights reserved
-02 Aug 2009
+04 Sept 2009
 Project source: http://svn.yellowbkpk.com/geo/trunk/shp-to-osm/
 Project website: http://redmine.yellowbkpk.com/projects/show/geo
 
