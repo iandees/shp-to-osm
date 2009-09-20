@@ -1,6 +1,6 @@
-SHP to OSM 0.6
+SHP to OSM 0.6.1
 Copyright Ian Dees, All rights reserved
-19 Sept 2009
+20 Sept 2009
 Project source: http://svn.yellowbkpk.com/geo/trunk/shp-to-osm/
 Project website: http://redmine.yellowbkpk.com/projects/show/geo
 
@@ -27,9 +27,10 @@ to issue the same command as long as you give it the same set of arguments. The 
 end of the command here is an optional flag to tell the application to only include ways that
 have had a tag applied to them. For now, it is required to be at the end of the arguments list.
 
- java -cp shp-to-osm-0.6-with-dependencies.jar Main
+ java -cp shp-to-osm-0.6.1-with-dependencies.jar Main
                                   --shapefile <path to input shapefile> \
                                   --rulesfile <path to rules file> \
-                                  --osmfile <path prefix to output osm file> \
-                                  [--maxnodes <max nodes per osm file>]
+                                  --osmfile <prefix of the output osm file name> \
+                                  [--outdir <root directory for output>] \
+                                  [--maxnodes <max nodes per osm file>] \
                                   [-t]
