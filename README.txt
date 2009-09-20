@@ -1,6 +1,6 @@
-SHP to OSM 0.5
+SHP to OSM 0.6
 Copyright Ian Dees, All rights reserved
-04 Sept 2009
+19 Sept 2009
 Project source: http://svn.yellowbkpk.com/geo/trunk/shp-to-osm/
 Project website: http://redmine.yellowbkpk.com/projects/show/geo
 
@@ -22,14 +22,14 @@ Rules file
 
 Running
 
-
  Use the following command line to run the app. Also, you can use the .bat or .sh run files
 to issue the same command as long as you give it the same set of arguments. The [-t] at the 
-end of the command here is an optional flag to tell the application to onlyinclude ways that
-have had a tag applied to them. For now, it is required to be at the end ofthe arguments list.
+end of the command here is an optional flag to tell the application to only include ways that
+have had a tag applied to them. For now, it is required to be at the end of the arguments list.
 
- java -cp shp-to-osm-0.5.jar Main --shapefile <path to input shapefile> \
+ java -cp shp-to-osm-0.6-with-dependencies.jar Main
+                                  --shapefile <path to input shapefile> \
                                   --rulesfile <path to rules file> \
-                                  --osmfile <path to output osm file> \
+                                  --osmfile <path prefix to output osm file> \
                                   [--maxnodes <max nodes per osm file>]
                                   [-t]
