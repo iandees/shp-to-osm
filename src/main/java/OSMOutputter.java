@@ -5,6 +5,6 @@ import osm.OSMFile;
 
 public interface OSMOutputter {
 
-    void write(OSMFile osmOut, File fileOut);
+    void write(OSMFile osmOut);
 
 }

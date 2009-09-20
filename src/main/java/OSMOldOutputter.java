@@ -16,8 +16,19 @@ import java.util.Iterator;
 
 public class OSMOldOutputter implements OSMOutputter {
 
-    public void write(OSMFile osmOut, File fileOut) {
-        saveOsmOut(osmOut, fileOut);
+    private File rootDir;
+    private String filePre;
+    private int count = 0;
+
+    public OSMOldOutputter(File rootDirFile, String filePrefix) {
+        rootDir = rootDirFile;
+        filePre = filePrefix;
+    }
+
+    public void write(OSMFile osmOut) {
+        File actualOutFile = new File(rootDir, filePre + count + ".osm");
+        saveOsmOut(osmOut, actualOutFile);
+        count++;
     }
 
     private void saveOsmOut(OSMFile osmOut, File actualOutput) {

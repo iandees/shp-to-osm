@@ -48,16 +48,14 @@ public class ShpToOsmConverter {
     private static final int MAX_ELEMENTS = 50000;
     private static final double LOADING_FACTOR = 1.25;
     private File inputFile;
-    private File outputFile;
     private RuleSet ruleset;
     private boolean onlyIncludeTaggedPrimitives;
     private int filesCreated = 0;
     private int maxElements = MAX_ELEMENTS;
     private OSMOutputter outputter;
 
-    public ShpToOsmConverter(File shpFile, RuleSet rules, File osmFile, boolean onlyIncludeTaggedPrim, int maxNodesPerFile, OSMOutputter out) {
+    public ShpToOsmConverter(File shpFile, RuleSet rules, boolean onlyIncludeTaggedPrim, int maxNodesPerFile, OSMOutputter out) {
         inputFile = shpFile;
-        outputFile = osmFile;
         maxElements = maxNodesPerFile;
         outputter = out;
         
@@ -119,8 +117,7 @@ public class ShpToOsmConverter {
                             int changes = osmOut.getChangeCount();
                             System.err.println("Approx new points: " + approxElementsThatWillBeAdded + "  Total so far: " + changes);
                             if(changes > 0 && changes + approxElementsThatWillBeAdded > maxElements) {
-                                File actualOutput = new File(outputFile.getAbsolutePath() + filesCreated + ".osm");
-                                outputter.write(osmOut, actualOutput);
+                                outputter.write(osmOut);
                                 osmOut = new OSMFile();
                                 filesCreated++;
                                 changes = 0;
@@ -275,8 +272,7 @@ public class ShpToOsmConverter {
             e.printStackTrace();
         }
 
-        File actualOutput = new File(outputFile.getName() + filesCreated + ".osm");
-        outputter.write(osmOut, actualOutput);
+        outputter.write(osmOut);
     }
 
     private boolean shouldInclude(Primitive w) {

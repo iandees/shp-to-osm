@@ -29,15 +29,23 @@ public class Main {
                 .withDescription("Path to the input shapefile.")
                 .withArgName("SHPFILE")
                 .hasArg()
+                .isRequired()
                 .create());
         options.addOption(OptionBuilder.withLongOpt("rulesfile")
                 .withDescription("Path to the input rules file.")
                 .withArgName("RULESFILE")
                 .hasArg()
+                .isRequired()
                 .create());
         options.addOption(OptionBuilder.withLongOpt("osmfile")
-                .withDescription("Prefix to the output OSM file path.")
+                .withDescription("Prefix of the output file name.")
                 .withArgName("OSMFILE")
+                .hasArg()
+                .isRequired()
+                .create());
+        options.addOption(OptionBuilder.withLongOpt("outdir")
+                .withDescription("Directory to output to. Default is working dir.")
+                .withArgName("OUTDIR")
                 .hasArg()
                 .create());
         options.addOption("t", false, "Keep only tagged elements.");
@@ -86,16 +94,17 @@ public class Main {
                 System.exit(-1);
             }
             
-            final String optionValue = line.getOptionValue("osmfile");
-            final int rootDirIndex = optionValue.lastIndexOf(File.separatorChar);
-            String rootDir = optionValue.substring(0, rootDirIndex);
-            File rootDirFile = new File(rootDir);
-            String filePrefix = optionValue.substring(rootDirIndex + 1);
-            File osmFile = null;
-            if (rootDirFile.exists() && rootDirFile.isDirectory()) {
-                osmFile = new File(optionValue);
+            final String filePrefix = line.getOptionValue("osmfile");
+            String rootDirStr;
+            if (line.hasOption("outdir")) {
+                rootDirStr = line.getOptionValue("outdir");
             } else {
-                System.err.println("Could not create output file with prefix: \"" + optionValue + "\".");
+                rootDirStr = ".";
+            }
+            File rootDirFile = new File(rootDirStr);
+            if (rootDirFile.exists() && rootDirFile.isDirectory()) {
+            } else {
+                System.err.println("Specified outdir is not a directory: \"" + rootDirStr + "\".");
                 HelpFormatter formatter = new HelpFormatter();
                 formatter.printHelp("java -cp shp-to-osm.jar", options, true);
                 System.exit(-1);
@@ -110,24 +119,25 @@ public class Main {
             }
             RuleSet rules = readFileToRulesSet(rulesFile);
 
-            OSMOutputter outputter = new OSMChangeOutputter();
+            OSMOutputter outputter = new OSMChangeOutputter(rootDirFile, filePrefix);
             if(line.hasOption("format")) {
                 String type = line.getOptionValue("format");
                 if("osm".equals(type)) {
-                    outputter = new OSMOldOutputter();
+                    outputter = new OSMOldOutputter(rootDirFile, filePrefix);
                 }
             } else {
                 System.err.println("No output format specified. Defaulting to osmChange format.");
             }
             
-            ShpToOsmConverter conv = new ShpToOsmConverter(shpFile, rules, osmFile, keepOnlyTaggedWays, maxNodesPerFile, outputter);
+            ShpToOsmConverter conv = new ShpToOsmConverter(shpFile, rules, keepOnlyTaggedWays, maxNodesPerFile, outputter);
             conv.go();
         } catch (IOException e) {
             System.err.println("Error reading rules file.");
             e.printStackTrace();
         } catch (ParseException e) {
-            e.printStackTrace();
-            System.err.println("Could not parse command line.");
+            System.err.println("Could not parse command line: " + e.getMessage());
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("java -cp shp-to-osm.jar", options, true);
         }
         
         // ShpToOsmGUI g = new ShpToOsmGUI();
