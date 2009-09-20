@@ -21,7 +21,7 @@ public class OSMChangeOutputter implements OSMOutputter {
     }
 
     private void saveOsmOut(OSMFile osmOut, File actualOutput) {
-        System.err.println("Writing out to file named " + actualOutput + ".");
+        System.err.println("Writing out to file " + actualOutput.getAbsolutePath() + ".");
     
         // Now write out the file
         try {

@@ -119,7 +119,7 @@ public class ShpToOsmConverter {
                             int changes = osmOut.getChangeCount();
                             System.err.println("Approx new points: " + approxElementsThatWillBeAdded + "  Total so far: " + changes);
                             if(changes > 0 && changes + approxElementsThatWillBeAdded > maxElements) {
-                                File actualOutput = new File(outputFile.getName() + filesCreated + ".osm");
+                                File actualOutput = new File(outputFile.getAbsolutePath() + filesCreated + ".osm");
                                 outputter.write(osmOut, actualOutput);
                                 osmOut = new OSMFile();
                                 filesCreated++;
@@ -275,7 +275,8 @@ public class ShpToOsmConverter {
             e.printStackTrace();
         }
 
-        outputter.write(osmOut, null);
+        File actualOutput = new File(outputFile.getName() + filesCreated + ".osm");
+        outputter.write(osmOut, actualOutput);
     }
 
     private boolean shouldInclude(Primitive w) {

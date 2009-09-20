@@ -86,6 +86,21 @@ public class Main {
                 System.exit(-1);
             }
             
+            final String optionValue = line.getOptionValue("osmfile");
+            final int rootDirIndex = optionValue.lastIndexOf(File.separatorChar);
+            String rootDir = optionValue.substring(0, rootDirIndex);
+            File rootDirFile = new File(rootDir);
+            String filePrefix = optionValue.substring(rootDirIndex + 1);
+            File osmFile = null;
+            if (rootDirFile.exists() && rootDirFile.isDirectory()) {
+                osmFile = new File(optionValue);
+            } else {
+                System.err.println("Could not create output file with prefix: \"" + optionValue + "\".");
+                HelpFormatter formatter = new HelpFormatter();
+                formatter.printHelp("java -cp shp-to-osm.jar", options, true);
+                System.exit(-1);
+            }
+            
             File rulesFile = new File(line.getOptionValue("rulesfile"));
             if(!rulesFile.canRead()) {
                 System.out.println("Could not read the input rulesfile.");
@@ -94,8 +109,6 @@ public class Main {
                 System.exit(-1);
             }
             RuleSet rules = readFileToRulesSet(rulesFile);
-            
-            File osmFile = new File(line.getOptionValue("osmfile"));
 
             OSMOutputter outputter = new OSMChangeOutputter();
             if(line.hasOption("format")) {
