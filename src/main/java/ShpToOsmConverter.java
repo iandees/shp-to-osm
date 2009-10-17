@@ -171,14 +171,12 @@ public class ShpToOsmConverter {
                                         Relation r = new Relation();
                                         r.addTag(new Tag("type", "multipolygon"));
                                         
-                                        // Tags go on the relation for multipolygons
+                                        // Tags go on the outer way(s) for multipolygons
 
-                                        applyRulesList(feature, geometryType, Arrays.asList(r), ruleset.getOuterPolygonRules());
+                                        applyRulesList(feature, geometryType, outerWays, ruleset.getOuterPolygonRules());
 
                                         for (Primitive outerWay : outerWays) {
-
                                             if (shouldInclude(outerWay)) {
-
                                                 r.addMember(new Member(outerWay, "outer"));
                                             }
                                         }
@@ -204,12 +202,12 @@ public class ShpToOsmConverter {
                                         // If there's more than one way, then it
                                         // needs to be a multipolygon and the
                                         // tags need to be applied to the
-                                        // relation
+                                        // outer ways
                                         if(outerWays.size() > 1) {
                                             Relation r = new Relation();
                                             r.addTag(new Tag("type", "multipolygon"));
 
-                                            applyRulesList(feature, geometryType, r, ruleset
+                                            applyRulesList(feature, geometryType, outerWays, ruleset
                                                     .getOuterPolygonRules());
 
                                             for (Way outerWay : outerWays) {
