@@ -18,6 +18,7 @@ import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
 import osm.OSMFile;
+import osm.output.OSMOutputter;
 import osm.primitive.Primitive;
 import osm.primitive.Tag;
 import osm.primitive.node.Node;

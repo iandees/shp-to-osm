@@ -12,6 +12,10 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import osm.output.OSMChangeOutputter;
+import osm.output.OSMOldOutputter;
+import osm.output.OSMOutputter;
+
 /**
  * @author Ian Dees
  * 
