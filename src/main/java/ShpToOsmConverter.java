@@ -17,7 +17,6 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
-import osm.OSMFile;
 import osm.output.OSMOutputter;
 import osm.primitive.Primitive;
 import osm.primitive.Tag;
@@ -64,7 +63,7 @@ public class ShpToOsmConverter {
         onlyIncludeTaggedPrimitives = onlyIncludeTaggedPrim;
     }
 
-    public void go() {
+    public void convert() {
 
         CoordinateReferenceSystem targetCRS = null;
         try {
@@ -75,8 +74,6 @@ public class ShpToOsmConverter {
         } catch (FactoryException e1) {
             e1.printStackTrace();
         }
-
-        OSMFile osmOut = new OSMFile();
 
         try {
             // Connection parameters
@@ -93,6 +90,8 @@ public class ShpToOsmConverter {
             } else {
                 System.err.println("Converting from " + sourceCRS + " to " + targetCRS);
             }
+            
+            outputter.start();
 
             // we are now connected
             String[] typeNames = dataStore.getTypeNames();
@@ -113,16 +112,6 @@ public class ShpToOsmConverter {
                             SimpleFeature feature = iterator.next();
 
                             Geometry rawGeom = (Geometry) feature.getDefaultGeometry();
-                            
-                            int approxElementsThatWillBeAdded = (int) (rawGeom.getNumPoints() * LOADING_FACTOR);
-                            int changes = osmOut.getChangeCount();
-                            System.err.println("Approx new points: " + approxElementsThatWillBeAdded + "  Total so far: " + changes);
-                            if(changes > 0 && changes + approxElementsThatWillBeAdded > maxElements) {
-                                outputter.write(osmOut);
-                                osmOut = new OSMFile();
-                                filesCreated++;
-                                changes = 0;
-                            }
                             
                             String geometryType = rawGeom.getGeometryType();
 
@@ -152,7 +141,7 @@ public class ShpToOsmConverter {
 									for (Way way : ways) {
 
 										if (shouldInclude(way)) {
-											osmOut.addWay(way);
+											outputter.addWay(way);
 										}
 									}
 								}
@@ -196,7 +185,7 @@ public class ShpToOsmConverter {
 
                                         }
 
-                                        osmOut.addRelation(r);
+                                        outputter.addRelation(r);
 
                                     } else {
                                         // If there's more than one way, then it
@@ -216,7 +205,7 @@ public class ShpToOsmConverter {
                                                 }
                                             }
                                             
-                                            osmOut.addRelation(r);
+                                            outputter.addRelation(r);
                                         } else {
                                             // If there aren't any inner lines, then
                                             // just use the outer one as a way.
@@ -225,7 +214,7 @@ public class ShpToOsmConverter {
 
                                             for (Way outerWay : outerWays) {
                                                 if (shouldInclude(outerWay)) {
-                                                    osmOut.addWay(outerWay);
+                                                    outputter.addWay(outerWay);
                                                 }
                                             }
                                         }
@@ -245,7 +234,7 @@ public class ShpToOsmConverter {
 
                                 for (Node node : nodes) {
                                     if (shouldInclude(node)) {
-                                        osmOut.addNode(node);
+                                        outputter.addNode(node);
                                     }
                                 }
                             }
@@ -271,7 +260,7 @@ public class ShpToOsmConverter {
             e.printStackTrace();
         }
 
-        outputter.write(osmOut);
+        outputter.finish();
     }
 
     private boolean shouldInclude(Primitive w) {

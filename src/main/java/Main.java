@@ -15,6 +15,8 @@ import org.apache.commons.cli.ParseException;
 import osm.output.OSMChangeOutputter;
 import osm.output.OSMOldOutputter;
 import osm.output.OSMOutputter;
+import osm.output.OutputFilter;
+import osm.output.SaveEverything;
 
 /**
  * @author Ian Dees
@@ -63,6 +65,11 @@ public class Main {
                 .withArgName("format")
                 .hasArg()
                 .create());
+        options.addOption(OptionBuilder.withLongOpt("glomKey")
+                .withDescription("The key to 'glom' on. Read the README for more info.")
+                .withArgName("key")
+                .hasArg()
+                .create());
         
         boolean keepOnlyTaggedWays = false;
         try {
@@ -70,17 +77,6 @@ public class Main {
             
             if(line.hasOption("t")) {
                 keepOnlyTaggedWays = true;
-            }
-            
-            int maxNodesPerFile = 50000;
-            if(line.hasOption("maxnodes")) {
-                String maxNodesString = line.getOptionValue("maxnodes");
-                try {
-                    maxNodesPerFile = Integer.parseInt(maxNodesString);
-                } catch(NumberFormatException e) {
-                    System.err.println("Error parsing max nodes value of \"" + maxNodesString
-                            + "\". Defaulting to 50000.");
-                }
             }
             
             if(!line.hasOption("shapefile") || !line.hasOption("rulesfile") || !line.hasOption("osmfile")) {
@@ -122,6 +118,14 @@ public class Main {
                 System.exit(-1);
             }
             RuleSet rules = readFileToRulesSet(rulesFile);
+            
+            boolean shouldGlom = false;
+            String glomKey = null;
+            if(line.hasOption("glomKey")) {
+                glomKey = line.getOptionValue("glomKey");
+                shouldGlom = true;
+                System.out.println("Will attempt to glom on key \'" + glomKey + "\'.");
+            }
 
             OSMOutputter outputter = new OSMChangeOutputter(rootDirFile, filePrefix);
             if(line.hasOption("format")) {
@@ -129,12 +133,29 @@ public class Main {
                 if("osm".equals(type)) {
                     outputter = new OSMOldOutputter(rootDirFile, filePrefix);
                 }
+                
+                if(shouldGlom) {
+                    OutputFilter glomFilter = new GlommingFilter(glomKey);
+                    outputter = new SaveEverything(outputter).withFilter(glomFilter);
+                }
             } else {
                 System.err.println("No output format specified. Defaulting to osmChange format.");
             }
             
+            int maxNodesPerFile = 50000;
+            if(line.hasOption("maxnodes")) {
+                String maxNodesString = line.getOptionValue("maxnodes");
+                try {
+                    maxNodesPerFile = Integer.parseInt(maxNodesString);
+                } catch(NumberFormatException e) {
+                    System.err.println("Error parsing max nodes value of \"" + maxNodesString
+                            + "\". Defaulting to 50000.");
+                }
+            }
+            outputter.setMaxElementsPerFile(maxNodesPerFile);
+            
             ShpToOsmConverter conv = new ShpToOsmConverter(shpFile, rules, keepOnlyTaggedWays, maxNodesPerFile, outputter);
-            conv.go();
+            conv.convert();
         } catch (IOException e) {
             System.err.println("Error reading rules file.");
             e.printStackTrace();

@@ -93,5 +93,11 @@
             <artifactId>commons-cli</artifactId>
             <version>20040117.000000</version>
         </dependency>
+        <dependency>
+        	<groupId>com.yellowbkpk.geo</groupId>
+        	<artifactId>glomifier</artifactId>
+        	<version>0.0.1-SNAPSHOT</version>
+        	<scope>compile</scope>
+        </dependency>
     </dependencies>
 </project>
