@@ -128,8 +128,8 @@ public class Main {
             }
 
             OSMOutputter outputter = new OSMChangeOutputter(rootDirFile, filePrefix);
-            if(line.hasOption("format")) {
-                String type = line.getOptionValue("format");
+            if(line.hasOption("outputFormat")) {
+                String type = line.getOptionValue("outputFormat");
                 if("osm".equals(type)) {
                     outputter = new OSMOldOutputter(rootDirFile, filePrefix);
                 }
