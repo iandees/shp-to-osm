@@ -45,18 +45,13 @@ import java.util.Map;
 public class ShpToOsmConverter {
 
     private static final int MAX_NODES_IN_WAY = 2000;
-    private static final int MAX_ELEMENTS = 50000;
-    private static final double LOADING_FACTOR = 1.25;
     private File inputFile;
     private RuleSet ruleset;
     private boolean onlyIncludeTaggedPrimitives;
-    private int filesCreated = 0;
-    private int maxElements = MAX_ELEMENTS;
     private OSMOutputter outputter;
 
-    public ShpToOsmConverter(File shpFile, RuleSet rules, boolean onlyIncludeTaggedPrim, int maxNodesPerFile, OSMOutputter out) {
+    public ShpToOsmConverter(File shpFile, RuleSet rules, boolean onlyIncludeTaggedPrim, OSMOutputter out) {
         inputFile = shpFile;
-        maxElements = maxNodesPerFile;
         outputter = out;
         
         ruleset = rules;
@@ -160,14 +155,13 @@ public class ShpToOsmConverter {
                                         Relation r = new Relation();
                                         r.addTag(new Tag("type", "multipolygon"));
                                         
-                                        // Tags go on the outer way(s) for multipolygons
+                                        // Tags go on the relation for multipolygons
 
-                                        applyRulesList(feature, geometryType, outerWays, ruleset.getOuterPolygonRules());
+                                        applyRulesList(feature, geometryType, Arrays.asList(r), ruleset.getOuterPolygonRules());
 
                                         for (Primitive outerWay : outerWays) {
-                                            if (shouldInclude(outerWay)) {
-                                                r.addMember(new Member(outerWay, "outer"));
-                                            }
+                                            // Always include every outer way
+                                            r.addMember(new Member(outerWay, "outer"));
                                         }
 
                                         // Then the inner ones, if any
@@ -184,19 +178,21 @@ public class ShpToOsmConverter {
                                             }
 
                                         }
-
-                                        outputter.addRelation(r);
+                                        
+                                        if (shouldInclude(r)) {
+                                            outputter.addRelation(r);
+                                        }
 
                                     } else {
                                         // If there's more than one way, then it
                                         // needs to be a multipolygon and the
                                         // tags need to be applied to the
-                                        // outer ways
+                                        // relation
                                         if(outerWays.size() > 1) {
                                             Relation r = new Relation();
                                             r.addTag(new Tag("type", "multipolygon"));
 
-                                            applyRulesList(feature, geometryType, outerWays, ruleset
+                                            applyRulesList(feature, geometryType, r, ruleset
                                                     .getOuterPolygonRules());
 
                                             for (Way outerWay : outerWays) {
@@ -204,8 +200,10 @@ public class ShpToOsmConverter {
                                                     r.addMember(new Member(outerWay, "outer"));
                                                 }
                                             }
-                                            
-                                            outputter.addRelation(r);
+
+                                            if (shouldInclude(r)) {
+                                                outputter.addRelation(r);
+                                            }
                                         } else {
                                             // If there aren't any inner lines, then
                                             // just use the outer one as a way.

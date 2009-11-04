@@ -156,7 +156,7 @@ public class Main {
             }
             outputter.setMaxElementsPerFile(maxNodesPerFile);
             
-            ShpToOsmConverter conv = new ShpToOsmConverter(shpFile, rules, keepOnlyTaggedWays, maxNodesPerFile, outputter);
+            ShpToOsmConverter conv = new ShpToOsmConverter(shpFile, rules, keepOnlyTaggedWays, outputter);
             conv.convert();
         } catch (IOException e) {
             System.err.println("Error reading rules file.");
