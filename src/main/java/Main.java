@@ -24,6 +24,8 @@ import osm.output.SaveEverything;
  */
 public class Main {
 
+    private static final String GENERATOR_STRING = "shp-to-osm 0.7";
+
     /**
      * @param args
      */
@@ -127,11 +129,11 @@ public class Main {
                 System.out.println("Will attempt to glom on key \'" + glomKey + "\'.");
             }
 
-            OSMOutputter outputter = new OSMChangeOutputter(rootDirFile, filePrefix);
+            OSMOutputter outputter = new OSMChangeOutputter(rootDirFile, filePrefix, GENERATOR_STRING);
             if(line.hasOption("outputFormat")) {
                 String type = line.getOptionValue("outputFormat");
                 if("osm".equals(type)) {
-                    outputter = new OSMOldOutputter(rootDirFile, filePrefix);
+                    outputter = new OSMOldOutputter(rootDirFile, filePrefix, GENERATOR_STRING);
                 }
                 
                 if(shouldGlom) {
