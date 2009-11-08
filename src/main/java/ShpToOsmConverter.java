@@ -75,6 +75,7 @@ public class ShpToOsmConverter {
             Map<String, Serializable> connectParameters = new HashMap<String, Serializable>();
 
             connectParameters.put("url", inputFile.toURI().toURL());
+            connectParameters.put("create spatial index", false);
             ShapefileDataStore dataStore = (ShapefileDataStore) DataStoreFinder.getDataStore(connectParameters);
 
             CoordinateReferenceSystem sourceCRS = dataStore.getSchema().getCoordinateReferenceSystem();
