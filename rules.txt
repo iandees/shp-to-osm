@@ -13,8 +13,11 @@
 #  line   = A line string of a MultiLineString
 #  point  = A point of a PointString
 #
-outer,FTYPE,StreamRiver,natural,river
-outer,GNIS_Name,,name,-
-line,GNIS_Name,,name,-
-line,FTYPE,CanalDitch,waterway,ditch
-line,FTYPE,StreamRiver,waterway,stream
+#outer,FTYPE,StreamRiver,natural,river
+#outer,GNIS_Name,,name,-
+#line,GNIS_Name,,name,-
+#line,FTYPE,CanalDitch,waterway,ditch
+#line,FTYPE,StreamRiver,waterway,stream
+outer,CEM_NAME,,name,-
+outer,Location,,location,-
+outer,,,landuse,cemetery
