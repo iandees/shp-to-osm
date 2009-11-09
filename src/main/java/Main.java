@@ -2,6 +2,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.cli.CommandLine;
@@ -23,6 +25,8 @@ import osm.output.SaveEverything;
  * 
  */
 public class Main {
+    
+    private static Logger log = Logger.getLogger(Main.class.getName());
 
     private static final String GENERATOR_STRING = "shp-to-osm 0.7";
 
@@ -159,17 +163,15 @@ public class Main {
             ShpToOsmConverter conv = new ShpToOsmConverter(shpFile, rules, keepOnlyTaggedWays, outputter);
             conv.convert();
         } catch (IOException e) {
-            System.err.println("Error reading rules file.");
-            e.printStackTrace();
+            log.log(Level.WARNING, "Error reading rules file.", e);
         } catch (ParseException e) {
             System.err.println("Could not parse command line: " + e.getMessage());
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("java -cp shp-to-osm.jar", options, true);
+        } catch (ShpToOsmException e) {
+            log.log(Level.SEVERE, "Error creating OSM data from shapefile.", e);
         }
         
-        // ShpToOsmGUI g = new ShpToOsmGUI();
-        // g.start();
-
     }
 
     /**
@@ -220,7 +222,7 @@ public class Main {
                     r = new Rule(type, srcKey, srcValue, targetKey, targetValue);
                 }
 
-                System.err.println("Adding rule " + r);
+                log.log(Level.CONFIG, "Adding rule " + r);
                 if ("inner".equals(type)) {
                     rules.addInnerPolygonRule(r);
                 } else if ("outer".equals(type)) {
@@ -230,10 +232,10 @@ public class Main {
                 } else if ("point".equals(type)) {
                     rules.addPointRule(r);
                 } else {
-                    System.err.println("Line " + lineCount + ": Unknown type " + type);
+                    log.log(Level.WARNING, "Line " + lineCount + ": Unknown type " + type);
                 }
             } else {
-                System.err.println("Skipped line " + lineCount + ": \"" + line + "\". Had " + splits.length
+                log.log(Level.WARNING, "Skipped line " + lineCount + ": \"" + line + "\". Had " + splits.length
                         + " pieces and expected 5.");
                 continue;
             }
