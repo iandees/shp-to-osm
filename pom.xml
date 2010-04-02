@@ -1,18 +1,31 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.yellowbkpk.geo</groupId>
     <artifactId>shp-to-osm</artifactId>
     <name>shp-to-osm</name>
-    <version>0.7.3</version>
+    <version>0.7.4</version>
     <description>A shapefile to OSM format converter.</description>
     <issueManagement>
         <system>Redmine</system>
         <url>http://redmine.yellowbkpk.com/projects/show/geo</url>
     </issueManagement>
     <scm>
-        <url>http://svn.yellowbkpk.com/geo/</url>
+        <url>http://svn.yellowbkpk.com/geo/tags/shp-to-osm-0.7.4</url>
+        <developerConnection>scm:svn:http://svn.yellowbkpk.com/geo/tags/shp-to-osm-0.7.4</developerConnection>
     </scm>
+  
+    <distributionManagement>
+        <repository>
+            <id>ssh.repo</id>
+            <name>SVN Repository</name>
+            <url>scp://svn.yellowbkpk.com/home/yellowb1/svn.yellowbkpk.com/dist/release/</url>
+        </repository>
+        <snapshotRepository>
+            <id>ssh.repo</id>
+            <name>SVN Snapshot Repository</name>
+            <url>scp://svn.yellowbkpk.com/home/yellowb1/svn.yellowbkpk.com/dist/snapshot/</url>
+        </snapshotRepository>
+    </distributionManagement>
     <build>
         <pluginManagement>
             <plugins>
@@ -85,7 +98,7 @@
         <dependency>
             <groupId>com.yellowbkpk.geo</groupId>
             <artifactId>osm-api</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.3</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -94,10 +107,10 @@
             <version>20040117.000000</version>
         </dependency>
         <dependency>
-        	<groupId>com.yellowbkpk.geo</groupId>
-        	<artifactId>glomifier</artifactId>
-        	<version>0.0.1-SNAPSHOT</version>
-        	<scope>compile</scope>
+            <groupId>com.yellowbkpk.geo</groupId>
+      	    <artifactId>glomifier</artifactId>
+            <version>0.1</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>
