@@ -27,7 +27,7 @@ to issue the same command as long as you give it the same set of arguments. The 
 end of the command here is an optional flag to tell the application to only include ways that
 have had a tag applied to them. For now, it is required to be at the end of the arguments list.
 
- java -cp shp-to-osm-0.7-with-dependencies.jar Main
+ java -cp shp-to-osm-0.7-with-dependencies.jar com.yellowbkpk.geo.shp.Main
                                   --shapefile <path to input shapefile> \
                                   --rulesfile <path to rules file> \
                                   --osmfile <prefix of the output osm file name> \

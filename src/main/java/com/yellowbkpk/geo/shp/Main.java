@@ -1,3 +1,4 @@
+package com.yellowbkpk.geo.shp;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -5,7 +6,6 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -13,6 +13,9 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang.StringEscapeUtils;
+
+import com.yellowbkpk.geo.glom.GlommingFilter;
 
 import osm.output.OSMChangeOutputter;
 import osm.output.OSMOldOutputter;

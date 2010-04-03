@@ -1,3 +1,4 @@
+package com.yellowbkpk.geo.shp;
 
 
 public class ShpToOsmException extends Exception {
