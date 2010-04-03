@@ -3,15 +3,15 @@
     <groupId>com.yellowbkpk.geo</groupId>
     <artifactId>shp-to-osm</artifactId>
     <name>shp-to-osm</name>
-    <version>0.7.5</version>
+    <version>0.7.6-SNAPSHOT</version>
     <description>A shapefile to OSM format converter.</description>
     <issueManagement>
         <system>Redmine</system>
         <url>http://redmine.yellowbkpk.com/projects/show/geo</url>
     </issueManagement>
     <scm>
-        <url>http://svn.yellowbkpk.com/geo/tags/shp-to-osm-0.7.5</url>
-        <developerConnection>scm:svn:http://svn.yellowbkpk.com/geo/tags/shp-to-osm-0.7.5</developerConnection>
+        <url>http://svn.yellowbkpk.com/geo/trunk/shp-to-osm</url>
+        <developerConnection>scm:svn:http://svn.yellowbkpk.com/geo/trunk/shp-to-osm</developerConnection>
     </scm>
   
     <distributionManagement>
