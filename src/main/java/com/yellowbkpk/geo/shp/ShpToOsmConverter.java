@@ -279,7 +279,18 @@ public class ShpToOsmConverter {
 
                 Object value = property.getValue();
                 if (value != null) {
-                    final String dirtyOriginalValue = value.toString().trim();
+                    String dirtyOriginalValue;
+                    if (value instanceof Double) {
+                        double asDouble = (Double) value;
+                        double floored = Math.floor(asDouble);
+                        if(floored == asDouble) {
+                            dirtyOriginalValue = Integer.toString((int) asDouble);
+                        } else {
+                            dirtyOriginalValue = Double.toString(asDouble);
+                        }
+                    } else {
+                        dirtyOriginalValue = value.toString().trim();
+                    }
 
                     if (!StringUtils.isEmpty(dirtyOriginalValue)) {
                         String escapedOriginalValue = StringEscapeUtils.escapeXml(dirtyOriginalValue);
