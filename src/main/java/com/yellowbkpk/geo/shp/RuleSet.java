@@ -1,14 +1,17 @@
 package com.yellowbkpk.geo.shp;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+
+import osm.primitive.Primitive;
 
 
 public class RuleSet {
 
-    private List<Rule> inner = new ArrayList<Rule>();
-    private List<Rule> outer = new ArrayList<Rule>();
-    private List<Rule> point = new ArrayList<Rule>();
-    private List<Rule> line = new ArrayList<Rule>();
+    private List<Rule> inner = new LinkedList<Rule>();
+    private List<Rule> outer = new LinkedList<Rule>();
+    private List<Rule> point = new LinkedList<Rule>();
+    private List<Rule> line = new LinkedList<Rule>();
+    private List<ExcludeRule> excludeRules = new LinkedList<ExcludeRule>();
     
     public void addInnerPolygonRule(Rule r) {
         inner.add(r);
@@ -34,6 +37,17 @@ public class RuleSet {
     }
     public List<Rule> getLineRules() {
         return line;
+    }
+    public void addFilter(ExcludeRule rule) {
+        excludeRules.add(rule);
+    }
+    public boolean includes(Primitive w) {
+        for (ExcludeRule rule : excludeRules) {
+            if(!rule.allows(w)) {
+                return false;
+            }
+        }
+        return true;
     }
     
 }

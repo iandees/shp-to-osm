@@ -22,6 +22,7 @@ import osm.output.OSMOldOutputter;
 import osm.output.OSMOutputter;
 import osm.output.OutputFilter;
 import osm.output.SaveEverything;
+import osm.primitive.PrimitiveTypeEnum;
 
 /**
  * @author Ian Dees
@@ -237,9 +238,21 @@ public class Main {
                 } else {
                     log.log(Level.WARNING, "Line " + lineCount + ": Unknown type " + type);
                 }
+            } else if (splits.length == 4) {
+                PrimitiveTypeEnum type = PrimitiveTypeEnum.valueOf(splits[0]);
+                String action = splits[1];
+                String key = splits[2];
+                String value = splits[3];
+
+                if ("exclude".equals(action)) {
+                    ExcludeRule excludeFilter = new ExcludeRule(type, key, value);
+                    rules.addFilter(excludeFilter);
+                    log.log(Level.CONFIG, "Adding exclude filter " + excludeFilter);
+                }
             } else {
-                log.log(Level.WARNING, "Skipped line " + lineCount + ": \"" + line + "\". Had " + splits.length
-                        + " pieces and expected 5.");
+                log.log(Level.WARNING, "Skipped line " + lineCount + ": \""
+                        + line + "\". Had " + splits.length
+                        + " pieces and expected 5 or 3.");
                 continue;
             }
         }

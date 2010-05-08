@@ -258,10 +258,10 @@ public class ShpToOsmConverter {
     }
 
     private boolean shouldInclude(Primitive w) {
-        if(onlyIncludeTaggedPrimitives) {
-            return w.hasTags();
+        if (onlyIncludeTaggedPrimitives) {
+            return w.hasTags() && ruleset.includes(w);
         } else {
-            return true;
+            return ruleset.includes(w);
         }
     }
 
