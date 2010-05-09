@@ -64,7 +64,6 @@ public class Main {
                 .withArgName("OUTDIR")
                 .hasArg()
                 .create());
-        options.addOption("t", false, "Keep only tagged elements.");
         options.addOption(OptionBuilder.withLongOpt("maxnodes")
                 .withDescription("Maximum elements per OSM file.")
                 .withArgName("nodes")
