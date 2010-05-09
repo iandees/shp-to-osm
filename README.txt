@@ -1,8 +1,7 @@
-SHP to OSM 0.7.3
+SHP to OSM 0.8.2
 Copyright Ian Dees, All rights reserved
-11 November 2009
-Project source: http://svn.yellowbkpk.com/geo/trunk/shp-to-osm/
-Project website: http://redmine.yellowbkpk.com/projects/show/geo
+8 May 2010
+Project website: http://github.com/iandees/shp-to-osm 
 
 Dependencies
 
@@ -19,6 +18,17 @@ Rules file
       3  The source attribute value to match. Can be empty to match all values.
       4  The name of the tag to apply when the source key/value pair match.
       5  The value of the tag to apply. Use a single dash ("-") to use the original value.
+ 
+ As of shp-to-osm 0.8, the rules file can contain an "exclude" rule. It is very similar
+to the field list above:
+
+ Field: Description:
+      1 The type of OSM primitive (node, way, relation)
+      2 The word "exclude"
+      3 A tag key to match for exclusion. If this is empty, all untagged elements will
+        be excluded from the output OSM file.
+      4 A tag value to match for exclusion. If this contains "*", then all elements that
+        have the tag key specified in field 3 will be excluded, regardless of value.
 
 Running
 
@@ -27,7 +37,7 @@ to issue the same command as long as you give it the same set of arguments. The 
 end of the command here is an optional flag to tell the application to only include ways that
 have had a tag applied to them. For now, it is required to be at the end of the arguments list.
 
- java -cp shp-to-osm-0.7-with-dependencies.jar com.yellowbkpk.geo.shp.Main
+ java -cp shp-to-osm-0.8.2-with-dependencies.jar com.yellowbkpk.geo.shp.Main
                                   --shapefile <path to input shapefile> \
                                   --rulesfile <path to rules file> \
                                   --osmfile <prefix of the output osm file name> \
@@ -35,7 +45,6 @@ have had a tag applied to them. For now, it is required to be at the end of the 
                                   [--outputFormat <osm|osmc>] \
                                   [--maxnodes <max nodes per osm file>] \
                                   [--glomKey <key to glom on (see README)>] \
-                                  [-t]
 
 Glomming
 
