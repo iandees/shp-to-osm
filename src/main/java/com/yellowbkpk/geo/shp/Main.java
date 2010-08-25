@@ -238,15 +238,21 @@ public class Main {
                     log.log(Level.WARNING, "Line " + lineCount + ": Unknown type " + type);
                 }
             } else if (splits.length == 4) {
-                PrimitiveTypeEnum type = PrimitiveTypeEnum.valueOf(splits[0]);
-                String action = splits[1];
-                String key = splits[2];
-                String value = splits[3];
-
-                if ("exclude".equals(action)) {
-                    ExcludeRule excludeFilter = new ExcludeRule(type, key, value);
-                    rules.addFilter(excludeFilter);
-                    log.log(Level.CONFIG, "Adding exclude filter " + excludeFilter);
+                try {
+                    PrimitiveTypeEnum type = PrimitiveTypeEnum.valueOf(splits[0]);
+                    String action = splits[1];
+                    String key = splits[2];
+                    String value = splits[3];
+        
+                    if ("exclude".equals(action)) {
+                        ExcludeRule excludeFilter = new ExcludeRule(type, key, value);
+                        rules.addFilter(excludeFilter);
+                        log.log(Level.CONFIG, "Adding exclude filter " + excludeFilter);
+                    }
+                } catch(IllegalArgumentException e) {
+                    log.log(Level.WARNING, "Skipped line " + lineCount + ": \""
+                        + line + "\". Unknown primtive type specified. Unless you're trying to do" +
+                        		" an exclude rule, you probably didn't put enough commas in.");
                 }
             } else {
                 log.log(Level.WARNING, "Skipped line " + lineCount + ": \""
