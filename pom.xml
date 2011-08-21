@@ -3,7 +3,7 @@
     <groupId>com.yellowbkpk.geo</groupId>
     <artifactId>shp-to-osm</artifactId>
     <name>shp-to-osm</name>
-    <version>0.8.2-SNAPSHOT</version>
+    <version>0.8.3-SNAPSHOT</version>
     <description>A shapefile to OSM format converter.</description>
     <issueManagement>
         <system>Redmine</system>
@@ -50,6 +50,11 @@
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.yellowbkpk.geo.shp.Main</mainClass>
+                        </manifest>
+                    </archive>
                 </configuration>
                 <executions>
                     <execution>

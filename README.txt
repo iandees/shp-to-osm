@@ -1,6 +1,6 @@
-SHP to OSM 0.8.2
+SHP to OSM 0.8.3
 Copyright Ian Dees, All rights reserved
-8 May 2010
+20 August 2011
 Project website: http://github.com/iandees/shp-to-osm 
 
 Dependencies
