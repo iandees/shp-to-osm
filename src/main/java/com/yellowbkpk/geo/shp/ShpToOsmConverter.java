@@ -58,16 +58,11 @@ public class ShpToOsmConverter {
 
     public void convert() throws ShpToOsmException {
 
-        CoordinateReferenceSystem targetCRS = null;
-        try {
-            targetCRS = CRS
-            .parseWKT("GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.01745329251994328,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]");
-        } catch (FactoryException e) {
-            throw new ShpToOsmException("Could not build the target CRS from WKT.", e);
-        }
+        CoordinateReferenceSystem targetCRS = buildTargetCRS();
 
         ShapefileDataStore dataStore = null;
         CoordinateReferenceSystem sourceCRS = null;
+        MathTransform transform = null;
         try {
             // Connection parameters
             Map<String, Serializable> connectParameters = new HashMap<String, Serializable>();
@@ -84,10 +79,13 @@ public class ShpToOsmConverter {
                 log.log(Level.CONFIG, "Converting from " + sourceCRS + " to " + targetCRS);
             }
 
+            transform = CRS.findMathTransform(sourceCRS, targetCRS, true);
         } catch (MalformedURLException e) {
             throw new ShpToOsmException("URL could not be created for input file.", e);
         } catch (IOException e) {
             throw new ShpToOsmException("Could not read input file.", e);
+        } catch (FactoryException e) {
+            throw new ShpToOsmException("Could not find a way to transform to lat/lon.", e);
         }
             
         outputter.start();
@@ -116,10 +114,7 @@ public class ShpToOsmConverter {
                     // Transform to spherical mercator
                     Geometry geometry = null;
                     try {
-                        MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS, true);
                         geometry = JTS.transform(rawGeom, transform);
-                    } catch (FactoryException e) {
-                        throw new ShpToOsmException("Could not build math transform for transform.", e);
                     } catch (TransformException e) {
                         throw new ShpToOsmException("Could not transform to spherical mercator.", e);
                     }
@@ -246,6 +241,17 @@ public class ShpToOsmConverter {
         }
 
         outputter.finish();
+    }
+
+    private CoordinateReferenceSystem buildTargetCRS() throws ShpToOsmException {
+        CoordinateReferenceSystem targetCRS = null;
+        try {
+            targetCRS = CRS
+            .parseWKT("GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.01745329251994328,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]");
+        } catch (FactoryException e) {
+            throw new ShpToOsmException("Could not build the target CRS from WKT.", e);
+        }
+        return targetCRS;
     }
 
     private boolean shouldInclude(Primitive w) {
