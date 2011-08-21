@@ -1,7 +1,7 @@
 package com.yellowbkpk.geo.shp;
 
-import osm.primitive.Primitive;
-import osm.primitive.PrimitiveTypeEnum;
+import com.yellowbkpk.osm.primitive.Primitive;
+import com.yellowbkpk.osm.primitive.PrimitiveTypeEnum;
 
 public class ExcludeRule {
 

@@ -5,15 +5,12 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.shapefile.ShapefileDataStore;
@@ -21,7 +18,6 @@ import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
-import org.opengis.feature.Property;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.FactoryException;
@@ -29,19 +25,18 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
-import osm.output.OSMOutputter;
-import osm.primitive.Primitive;
-import osm.primitive.Tag;
-import osm.primitive.node.Node;
-import osm.primitive.relation.Member;
-import osm.primitive.relation.Relation;
-import osm.primitive.way.Way;
-
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+import com.yellowbkpk.osm.output.OSMOutputter;
+import com.yellowbkpk.osm.primitive.Primitive;
+import com.yellowbkpk.osm.primitive.Tag;
+import com.yellowbkpk.osm.primitive.node.Node;
+import com.yellowbkpk.osm.primitive.way.Way;
+import com.yellowbkpk.osm.relation.Member;
+import com.yellowbkpk.osm.relation.Relation;
 
 public class ShpToOsmConverter {
     

@@ -16,13 +16,12 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import com.yellowbkpk.geo.glom.GlommingFilter;
-
-import osm.output.OSMChangeOutputter;
-import osm.output.OSMOldOutputter;
-import osm.output.OSMOutputter;
-import osm.output.OutputFilter;
-import osm.output.SaveEverything;
-import osm.primitive.PrimitiveTypeEnum;
+import com.yellowbkpk.osm.output.OSMChangeOutputter;
+import com.yellowbkpk.osm.output.OSMOldOutputter;
+import com.yellowbkpk.osm.output.OSMOutputter;
+import com.yellowbkpk.osm.output.OutputFilter;
+import com.yellowbkpk.osm.output.SaveEverything;
+import com.yellowbkpk.osm.primitive.PrimitiveTypeEnum;
 
 /**
  * @author Ian Dees

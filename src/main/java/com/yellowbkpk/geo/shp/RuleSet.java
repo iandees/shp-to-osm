@@ -8,8 +8,8 @@ import org.apache.commons.lang.StringUtils;
 import org.opengis.feature.Property;
 import org.opengis.feature.simple.SimpleFeature;
 
-import osm.primitive.Primitive;
-import osm.primitive.Tag;
+import com.yellowbkpk.osm.primitive.Primitive;
+import com.yellowbkpk.osm.primitive.Tag;
 
 public class RuleSet {
 

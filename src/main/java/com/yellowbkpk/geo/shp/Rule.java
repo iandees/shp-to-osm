@@ -1,5 +1,6 @@
 package com.yellowbkpk.geo.shp;
-import osm.primitive.Tag;
+
+import com.yellowbkpk.osm.primitive.Tag;
 
 public class Rule {
 
