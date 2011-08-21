@@ -1,4 +1,4 @@
-SHP to OSM 0.8.3
+SHP to OSM 0.8.4
 Copyright Ian Dees, All rights reserved
 20 August 2011
 Project website: http://github.com/iandees/shp-to-osm 
@@ -42,7 +42,7 @@ to issue the same command as long as you give it the same set of arguments. The 
 end of the command here is an optional flag to tell the application to only include ways that
 have had a tag applied to them. For now, it is required to be at the end of the arguments list.
 
- java -cp shp-to-osm-0.8.2-with-dependencies.jar com.yellowbkpk.geo.shp.Main
+ java -cp shp-to-osm-0.8.4-with-dependencies.jar com.yellowbkpk.geo.shp.Main
                                   --shapefile <path to input shapefile> \
                                   --osmfile <prefix of the output osm file name> \
                                   [--copyTags <prefix>] \
