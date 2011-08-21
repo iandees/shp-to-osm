@@ -10,10 +10,6 @@ import org.opengis.feature.simple.SimpleFeature;
 
 import osm.primitive.Primitive;
 import osm.primitive.Tag;
-import osm.primitive.node.Node;
-import osm.primitive.relation.Relation;
-import osm.primitive.way.Way;
-
 
 public class RuleSet {
 
@@ -97,18 +93,7 @@ public class RuleSet {
 
                 Object value = property.getValue();
                 if (value != null) {
-                    String dirtyOriginalValue;
-                    if (value instanceof Double) {
-                        double asDouble = (Double) value;
-                        double floored = Math.floor(asDouble);
-                        if(floored == asDouble) {
-                            dirtyOriginalValue = Integer.toString((int) asDouble);
-                        } else {
-                            dirtyOriginalValue = Double.toString(asDouble);
-                        }
-                    } else {
-                        dirtyOriginalValue = value.toString().trim();
-                    }
+                    String dirtyOriginalValue = getDirtyValue(value);
                     
                     if (!StringUtils.isEmpty(dirtyOriginalValue)) {
                         String escapedOriginalValue = StringEscapeUtils.escapeXml(dirtyOriginalValue);
@@ -126,6 +111,21 @@ public class RuleSet {
             }
         }
     }
+    private static String getDirtyValue(Object value) {
+        String dirtyOriginalValue;
+        if (value instanceof Double) {
+            double asDouble = (Double) value;
+            double floored = Math.floor(asDouble);
+            if(floored == asDouble) {
+                dirtyOriginalValue = Integer.toString((int) asDouble);
+            } else {
+                dirtyOriginalValue = Double.toString(asDouble);
+            }
+        } else {
+            dirtyOriginalValue = value.toString().trim();
+        }
+        return dirtyOriginalValue;
+    }
 
     private static void applyOriginalTagsTo(SimpleFeature feature, String geometryType, Primitive w, String prefix) {
         String prefixPlusColon = prefix + ":";
@@ -134,15 +134,16 @@ public class RuleSet {
         for (Property property : properties) {
             String name = property.getType().getName().toString();
             if (!geometryType.equals(name)) {
-                String value = property.getValue().toString();
-                
-                if(value.trim().length() == 0) {
-                    continue;
-                }
-                
-                value = StringEscapeUtils.escapeXml(value);
+                Object value = property.getValue();
+                if (value != null) {
+                    String dirtyOriginalValue = getDirtyValue(value);
 
-                w.addTag(new Tag(prefixPlusColon + name, value));
+                    if (!StringUtils.isEmpty(dirtyOriginalValue)) {
+                        String escapedOriginalValue = StringEscapeUtils.escapeXml(dirtyOriginalValue);
+
+                        w.addTag(new Tag(prefixPlusColon + name, escapedOriginalValue));
+                    }
+                }
             }
         }
     }
