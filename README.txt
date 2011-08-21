@@ -30,6 +30,11 @@ to the field list above:
       4 A tag value to match for exclusion. If this contains "*", then all elements that
         have the tag key specified in field 3 will be excluded, regardless of value.
 
+ Use the --copyTags argument to copy all the attributes from the shapefile's .dbf to
+tags in the resulting OSM file. An optional string argument to --copyTags will add
+a prefix to all copied tag. Tags will only be copied if their value is non-empty or
+non-null.
+
 Running
 
  Use the following command line to run the app. Also, you can use the .bat or .sh run files
@@ -39,8 +44,9 @@ have had a tag applied to them. For now, it is required to be at the end of the 
 
  java -cp shp-to-osm-0.8.2-with-dependencies.jar com.yellowbkpk.geo.shp.Main
                                   --shapefile <path to input shapefile> \
-                                  --rulesfile <path to rules file> \
                                   --osmfile <prefix of the output osm file name> \
+                                  [--copyTags <prefix>] \
+                                  [--rulesfile <path to rules file>] \
                                   [--outdir <root directory for output>] \
                                   [--outputFormat <osm|osmc>] \
                                   [--maxnodes <max nodes per osm file>] \
