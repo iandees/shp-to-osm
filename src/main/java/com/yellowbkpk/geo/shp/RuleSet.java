@@ -129,7 +129,7 @@ public class RuleSet {
 
     private static void applyOriginalTagsTo(SimpleFeature feature, String geometryType, Primitive w, String prefix) {
         String prefixPlusColon = "";
-        if ("".equals(prefix)) {
+        if (!"".equals(prefix)) {
             prefixPlusColon = prefix + ":";
         }
         
