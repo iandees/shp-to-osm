@@ -57,8 +57,8 @@ public class ShpToOsmConverter {
         inputFile = shpFile;
         outputter = out;
         
-        ruleset = rules;
-        onlyIncludeTaggedPrimitives = onlyIncludeTaggedPrim;
+        this.ruleset = rules;
+        this.onlyIncludeTaggedPrimitives = onlyIncludeTaggedPrim;
     }
 
     public void convert() throws ShpToOsmException {
@@ -136,8 +136,7 @@ public class ShpToOsmConverter {
 									.getGeometryN(i);
 
 							List<Way> ways = linestringToWays(geometryN);
-							applyRulesList(feature, geometryType, ways,
-									ruleset.getLineRules());
+							ruleset.applyLineRules(feature, geometryType, ways);
 							for (Way way : ways) {
 
 								if (shouldInclude(way)) {
@@ -162,7 +161,7 @@ public class ShpToOsmConverter {
                                 
                                 // Tags go on the relation for multipolygons
 
-                                applyRulesList(feature, geometryType, Arrays.asList(r), ruleset.getOuterPolygonRules());
+                                ruleset.applyOuterPolygonRules(feature, geometryType, Arrays.asList(r));
 
                                 for (Primitive outerWay : outerWays) {
                                     // Always include every outer way
@@ -175,8 +174,7 @@ public class ShpToOsmConverter {
 
                                     List<Way> innerWays = polygonToWays(innerLine);
 
-                                    applyRulesList(feature, geometryType, innerWays, ruleset
-                                            .getInnerPolygonRules());
+                                    ruleset.applyInnerPolygonRules(feature, geometryType, innerWays);
                                     
                                     for (Way innerWay : innerWays) {
                                         r.addMember(new Member(innerWay, "inner"));
@@ -197,8 +195,7 @@ public class ShpToOsmConverter {
                                     Relation r = new Relation();
                                     r.addTag(new Tag("type", "multipolygon"));
 
-                                    applyRulesList(feature, geometryType, r, ruleset
-                                            .getOuterPolygonRules());
+                                    ruleset.applyOuterPolygonRules(feature, geometryType, Arrays.asList(r));
 
                                     for (Way outerWay : outerWays) {
                                         if (shouldInclude(outerWay)) {
@@ -212,8 +209,7 @@ public class ShpToOsmConverter {
                                 } else {
                                     // If there aren't any inner lines, then
                                     // just use the outer one as a way.
-                                    applyRulesList(feature, geometryType, outerWays, ruleset
-                                            .getOuterPolygonRules());
+                                    ruleset.applyOuterPolygonRules(feature, geometryType, outerWays);
 
                                     for (Way outerWay : outerWays) {
                                         if (shouldInclude(outerWay)) {
@@ -233,7 +229,7 @@ public class ShpToOsmConverter {
                             nodes.add(n);
                         }
 
-                        applyRulesList(feature, geometryType, nodes, ruleset.getPointRules());
+                        ruleset.applyPointRules(feature, geometryType, nodes);
 
                         for (Node node : nodes) {
                             if (shouldInclude(node)) {
@@ -270,62 +266,6 @@ public class ShpToOsmConverter {
         return new Node(coord.y, coord.x);
     }
 
-    private void applyRulesList(SimpleFeature feature, String geometryType, List<? extends Primitive> features,
-            List<Rule> rulelist) {
-        Collection<Property> properties = feature.getProperties();
-        for (Property property : properties) {
-            String srcKey = property.getType().getName().toString();
-            if (!geometryType.equals(srcKey)) {
-
-                Object value = property.getValue();
-                if (value != null) {
-                    String dirtyOriginalValue;
-                    if (value instanceof Double) {
-                        double asDouble = (Double) value;
-                        double floored = Math.floor(asDouble);
-                        if(floored == asDouble) {
-                            dirtyOriginalValue = Integer.toString((int) asDouble);
-                        } else {
-                            dirtyOriginalValue = Double.toString(asDouble);
-                        }
-                    } else {
-                        dirtyOriginalValue = value.toString().trim();
-                    }
-
-                    if (!StringUtils.isEmpty(dirtyOriginalValue)) {
-                        String escapedOriginalValue = StringEscapeUtils.escapeXml(dirtyOriginalValue);
-
-                        for (Rule rule : rulelist) {
-                            Tag t = rule.createTag(srcKey, escapedOriginalValue);
-                            if (t != null) {
-                            	for (Primitive primitive : features) {
-									primitive.addTag(t);
-								}
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    private void applyRulesList(SimpleFeature feature, String geometryType, Primitive features, List<Rule> rulelist) {
-        applyRulesList(feature, geometryType, Arrays.asList(features), rulelist);
-    }
-
-    private static void applyOriginalTagsTo(SimpleFeature feature, String geometryType, Primitive w) {
-        Collection<Property> properties = feature.getProperties();
-        for (Property property : properties) {
-            String name = property.getType().getName().toString();
-            if (!geometryType.equals(name)) {
-                String value = property.getValue().toString();
-                value = StringEscapeUtils.escapeXml(value);
-
-                w.addTag(new Tag(name, value));
-            }
-        }
-    }
-    
     private static List<Way> linestringToWays(LineString geometryN) {
         Coordinate[] coordinates = geometryN.getCoordinates();
         

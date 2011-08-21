@@ -51,7 +51,6 @@ public class Main {
                 .withDescription("Path to the input rules file.")
                 .withArgName("RULESFILE")
                 .hasArg()
-                .isRequired()
                 .create());
         options.addOption(OptionBuilder.withLongOpt("osmfile")
                 .withDescription("Prefix of the output file name.")
@@ -78,6 +77,11 @@ public class Main {
                 .withDescription("The key to 'glom' on. Read the README for more info.")
                 .withArgName("key")
                 .hasArg()
+                .create());
+        options.addOption(OptionBuilder.withLongOpt("copyTags")
+                .withDescription("Copy all shapefile attributes to OSM tags verbatim, with an optional prefix.")
+                .withArgName("prefix")
+                .hasOptionalArg()
                 .create());
         
         boolean keepOnlyTaggedWays = false;
@@ -119,14 +123,24 @@ public class Main {
                 System.exit(-1);
             }
             
-            File rulesFile = new File(line.getOptionValue("rulesfile"));
-            if(!rulesFile.canRead()) {
-                System.out.println("Could not read the input rulesfile.");
-                HelpFormatter formatter = new HelpFormatter();
-                formatter.printHelp("java -cp shp-to-osm.jar", options, true);
-                System.exit(-1);
+            RuleSet rules = new RuleSet();
+            
+            boolean useAllTags = line.hasOption("copyTags");
+            if (useAllTags) {
+                String allTagsPrefix = line.getOptionValue("copyTags", "");
+                rules.setUseAllTags(allTagsPrefix);
             }
-            RuleSet rules = readFileToRulesSet(rulesFile);
+
+            if (line.hasOption("rulesfile")) {
+                File rulesFile = new File(line.getOptionValue("rulesfile"));
+                if (!rulesFile.canRead()) {
+                    System.out.println("Could not read the input rulesfile.");
+                    HelpFormatter formatter = new HelpFormatter();
+                    formatter.printHelp("java -cp shp-to-osm.jar", options, true);
+                    System.exit(-1);
+                }
+                rules.appendRules(readFileToRulesSet(rulesFile));
+            }
             
             boolean shouldGlom = false;
             String glomKey = null;
