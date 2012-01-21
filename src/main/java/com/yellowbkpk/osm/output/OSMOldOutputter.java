@@ -139,7 +139,7 @@ public class OSMOldOutputter extends AbstractOutputter {
     
             out.write("  <node ");
             writePrimitveAttrs(out, node);
-            writeAttr(out, "lat", LAT_LON_FORMAT.format(node.getLon()));
+            writeAttr(out, "lat", LAT_LON_FORMAT.format(node.getLat()));
             writeAttr(out, "lon", LAT_LON_FORMAT.format(node.getLon()));
     
             if (node.hasTags()) {
