@@ -5,28 +5,12 @@
     <name>shp-to-osm</name>
     <version>0.8.7-SNAPSHOT</version>
     <description>A shapefile to OSM format converter.</description>
-    <issueManagement>
-        <system>Redmine</system>
-        <url>http://redmine.yellowbkpk.com/projects/show/geo</url>
-    </issueManagement>
     <scm>
         <connection>scm:git:git@github.com:iandees/shp-to-osm.git</connection>
         <url>scm:git:git@github.com:iandees/shp-to-osm.git</url>
         <developerConnection>scm:git:git@github.com:iandees/shp-to-osm.git</developerConnection>
     </scm>
-  
-    <distributionManagement>
-        <repository>
-            <id>ssh.repo</id>
-            <name>SVN Repository</name>
-            <url>scp://svn.yellowbkpk.com/home/yellowb1/svn.yellowbkpk.com/dist/release/</url>
-        </repository>
-        <snapshotRepository>
-            <id>ssh.repo</id>
-            <name>SVN Snapshot Repository</name>
-            <url>scp://svn.yellowbkpk.com/home/yellowb1/svn.yellowbkpk.com/dist/snapshot/</url>
-        </snapshotRepository>
-    </distributionManagement>
+
     <build>
         <pluginManagement>
             <plugins>
@@ -75,14 +59,9 @@
     </build>
     <repositories>
         <repository>
-            <id>geotools</id>
-            <name>GeoTools</name>
-            <url>http://repo.opengeo.org</url>
-        </repository>
-        <repository>
-            <id>geotools-fr</id>
-            <name>GeoTools-FR</name>
-            <url>http://maven.geotools.fr/repository</url>
+            <id>osgeo</id>
+            <name>Open Source Geospatial Foundation Repository</name>
+            <url>http://download.osgeo.org/webdav/geotools/</url>
         </repository>
         <repository>
             <id>java.net</id>
@@ -94,7 +73,7 @@
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-shapefile</artifactId>
-            <version>2.5.3</version>
+            <version>2.7.4</version>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
