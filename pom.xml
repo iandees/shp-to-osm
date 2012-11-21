@@ -3,7 +3,7 @@
     <groupId>com.yellowbkpk.geo</groupId>
     <artifactId>shp-to-osm</artifactId>
     <name>shp-to-osm</name>
-    <version>0.8.7</version>
+    <version>0.8.8-SNAPSHOT</version>
     <description>A shapefile to OSM format converter.</description>
     <scm>
         <connection>scm:git:git@github.com:iandees/shp-to-osm.git</connection>
