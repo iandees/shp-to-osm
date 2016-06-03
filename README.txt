@@ -42,11 +42,11 @@ to issue the same command as long as you give it the same set of arguments. The 
 end of the command here is an optional flag to tell the application to only include ways that
 have had a tag applied to them. For now, it is required to be at the end of the arguments list.
 
- java -cp shp-to-osm-0.8.5-with-dependencies.jar com.yellowbkpk.geo.shp.Main
+ java -cp shp-to-osm-0.8.5-with-dependencies.jar com.yellowbkpk.geo.shp.Main \
                                   --shapefile <path to input shapefile> \
                                   --osmfile <prefix of the output osm file name> \
+                                  --rulesfile <path to rules file> \
                                   [--copyTags <prefix>] \
-                                  [--rulesfile <path to rules file>] \
                                   [--outdir <root directory for output>] \
                                   [--outputFormat <osm|osmc>] \
                                   [--maxnodes <max nodes per osm file>] \

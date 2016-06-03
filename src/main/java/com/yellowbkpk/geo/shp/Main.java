@@ -49,6 +49,7 @@ public class Main {
         options.addOption(OptionBuilder.withLongOpt("rulesfile")
                 .withDescription("Path to the input rules file.")
                 .withArgName("RULESFILE")
+                .isRequired()
                 .hasArg()
                 .create());
         options.addOption(OptionBuilder.withLongOpt("osmfile")
